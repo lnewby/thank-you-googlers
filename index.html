@@ -18,7 +18,7 @@
         }
     </style>
 </head>
-<body onload="startGame()" onkeypress="eventSystem(event)">
+<body onload="startGame()">
     <div id="container">
         <canvas id="game-canvas" width="540" height="270" style="border:1px solid #0a80ff;">
     </div>
@@ -29,7 +29,8 @@
     <button onclick="movedown()">DOWN</button>
     <button onclick="moveleft()">LEFT</button>
     <button onclick="moveright()">RIGHT</button>
-
+    <button onmousedown="showHint()" onmouseup="hideHint()">HINT</button>
+    <button onclick="bubblesort()">BUBBLESORT</button>
     <script src="game.js"></script>
 </body>
 </html>

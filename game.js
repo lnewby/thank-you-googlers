@@ -1,7 +1,9 @@
-console.log("Hello, Googlers!");
+console.log("Thank you, Googlers!");
 const BLOCK_WIDTH = 90;
 const BLOCK_HEIGHT = 90;
+let SHOW_HINT = false;
 let blankPieceGridIndex;
+let gameBlocks = [];
 
 class puzzleBlock {
     constructor(index, spriteX = 0, spriteY = 0, row = 0, col = 0) {
@@ -12,22 +14,12 @@ class puzzleBlock {
         this.index = index;
         this.deltaX = 0;
         this.deltaY = 0;
-        let c = ["red", "yellow", "green", "blue"];
-        this.color = c[Math.floor(Math.random() * 4)];
-    }
-
-    update() {
-        this.x += this.deltaX;
-        this.y += this.deltaY;
-        this.deltaX = 0;
-        this.deltaY = 0;
     }
 }
 
 function initPuzzleBlocks(grid, sprite, rows, cols) {
     
     // build puzzle pieces
-    let gameBlocks = [];
     let spriteWidth = sprite.width / cols;
     let spriteHeight = sprite.height / rows;
 
@@ -46,10 +38,10 @@ function initPuzzleBlocks(grid, sprite, rows, cols) {
         }
     }
 
-    // builds array of ints [0,1,2,3... WxH]
+    // array of ints [0,1,2,3... WxH] to help randomize pieces on grid
     let pieces = Array.from(Array(grid.length).keys())
 
-    // randomly assign puzzle piece on grid
+    // randomly assign puzzle pieces on grid
     for (let i = 0; i < grid.length; ++i) {
         let pieceIndex = Math.floor(Math.random() * pieces.length);
         grid[i].block = gameBlocks[pieces[pieceIndex]];
@@ -71,8 +63,7 @@ function getInitGrid(rows, cols, sprite) {
                 y: row * BLOCK_HEIGHT,
                 row,
                 col,
-                block: null,
-                blockIndex: null
+                block: null
             });
         }
     }
@@ -85,64 +76,83 @@ function getInitGrid(rows, cols, sprite) {
 let sliderPuzzle = {
     canvas: document.getElementById("game-canvas"),
     gameGrid: [],
+    numRows: null,
+    numCols: null,
     sprite: new Image(),
-    start: function(rows = 3, cols = 6) {
-        this.context = this.canvas.getContext("2d");
-        this.interval = setInterval(updateGame, 20);
+    start: function(rows = 2, cols = 2) {
+        this.context = this.canvas.getContext("2d"); 
         this.sprite.src = "Google.png";
+        this.numRows = rows;
+        this.numCols = cols;
         this.gameGrid = getInitGrid(rows, cols, this.sprite);
+        this.interval = setInterval(updateGame, 20);
     },
     clear: function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
-    update: function() {
-        // update all game pieces
-        for (let i = 0; i < this.gameGrid.length; ++i) {
-            this.gameGrid[i].block.update();
-        }
-    },
     draw: function() {
-        let numRows = 3;
-        let numColumns = 6;
-        let spriteWidth = this.sprite.width / numColumns;
-        let spriteHeight = this.sprite.height / numRows;
-        for (let i = 0; i < this.gameGrid.length; ++i) {
-            let {x, y, block} = this.gameGrid[i];
-            if (i != blankPieceGridIndex) {
-                this.context.drawImage(
-                    this.sprite, 
-                    block.spriteX, 
-                    block.spriteY, 
-                    spriteWidth, 
-                    spriteHeight, 
-                    x, y, 
-                    BLOCK_WIDTH, 
-                    BLOCK_HEIGHT
-                );
-            } else {
-                this.context.fillStyle = "grey";
-                this.context.fillRect(x, y, BLOCK_WIDTH, BLOCK_HEIGHT);
+        if (SHOW_HINT) {
+            this.context.drawImage(this.sprite, 0, 0, this.canvas.width, this.canvas.height);
+        } else {
+            let spriteWidth = this.sprite.width / this.numCols;
+            let spriteHeight = this.sprite.height / this.numRows;
+            for (let i = 0; i < this.gameGrid.length; ++i) {
+                let {x, y, block} = this.gameGrid[i];
+                if (i != blankPieceGridIndex) {
+                    this.context.drawImage(
+                        this.sprite, 
+                        block.spriteX, 
+                        block.spriteY, 
+                        spriteWidth, 
+                        spriteHeight, 
+                        x, y, 
+                        BLOCK_WIDTH, 
+                        BLOCK_HEIGHT
+                    );
+                } else {
+                    this.context.fillStyle = "grey";
+                    this.context.fillRect(x, y, BLOCK_WIDTH, BLOCK_HEIGHT);
+                }
+                
             }
-            
         }
     },
     swapPuzzleBlocks(index1, index2) {
         let tempBlock = this.gameGrid[index1].block;
         this.gameGrid[index1].block = this.gameGrid[index2].block;
         this.gameGrid[index2].block = tempBlock;
+    },
+    checkWinState() {
+        let winState = true;
+
+        for (let gridIndex = 0; gridIndex < this.gameGrid.length; ++gridIndex) {
+            let { block } = this.gameGrid[gridIndex];
+            winState &= (block.index == gridIndex);
+            if (!winState) break;
+        }
+
+        if (winState) {
+            
+        } else {
+            
+        }
+        
+        return winState;
     }
 }
 
 function startGame() {
     console.log("Starting Game...");
-    sliderPuzzle.start();
+    let numRows = 3;
+    let numCols = 6;
+    sliderPuzzle.start(numRows, numCols);
 }
 
 
 function updateGame() {
     sliderPuzzle.clear();
-    sliderPuzzle.update();
     sliderPuzzle.draw();
+    sliderPuzzle.checkWinState()
 }
 
 // Event System
@@ -183,11 +193,23 @@ function moveright() {
     }
 }
 
+function showHint() {
+    SHOW_HINT = true;
+}
+
+function hideHint() {
+    SHOW_HINT = false;
+}
+
 document.addEventListener('keydown', e => {
-    e.preventDefault();
     let key = e.key || String.fromCharCode(e.keyCode);
+
+    if (key in ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"])
+        e.preventDefault();
+
     switch(key) {
         case "ArrowUp": 
+            e.preventDefault();
             moveup();
             break;
         case "ArrowDown": 
