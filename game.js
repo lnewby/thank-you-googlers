@@ -3,7 +3,8 @@ const GameStatus = Object.freeze({
     IN_PROGESS: 1,
     SOLVED: 2,
     SHOW_HINT: 3,
-    SHUFFLE_BOARD: 4
+    SHUFFLE_BOARD: 4,
+    BUBBLE_SORT: 5
 });
 
 const GameState = {
@@ -155,7 +156,6 @@ let sliderPuzzle = {
                 }
                 break;
             case GameStatus.SOLVED:
-                if (GameState.DEBUG) console.log("winner!!!");
                 this.showSolution();
                 break;
             case GameStatus.SHOW_HINT:
@@ -163,6 +163,9 @@ let sliderPuzzle = {
                 break;
             case GameStatus.SHUFFLE_BOARD:
                 this.shuffleBoard();
+                break;
+            case GameStatus.BUBBLE_SORT:
+                this.bubbleSortSolve();
                 break;
             default:
                 break;
@@ -198,6 +201,19 @@ let sliderPuzzle = {
             console.log(`inversions: ${totalInversions()}`);
 
         GameState.STATUS = GameStatus.IN_PROGESS;
+    },
+    bubbleSortSolve(firstIndex = 0, swaps = 0) {
+        if (firstIndex < this.gameGrid.length - 1) {
+            let secondIndex = firstIndex + 1;
+            
+            if (this.gameGrid[firstIndex].block.index > this.gameGrid[secondIndex].block.index) {
+                sliderPuzzle.swapPuzzleBlocks(firstIndex, secondIndex);
+                ++swaps;
+            }
+            setTimeout(function(){ sliderPuzzle.bubbleSortSolve(secondIndex, swaps); }, 300);
+        } else if (swaps) {
+            setTimeout(function(){ sliderPuzzle.bubbleSortSolve(); }, 300);
+        }
     }
 };
 
@@ -282,6 +298,11 @@ function hideHint() {
 
 function shuffleBoard() {
     GameState.STATUS = GameStatus.SHUFFLE_BOARD;
+}
+
+function bubbleSort() {
+    // GameState.STATUS = GameStatus.BUBBLE_SORT;
+    sliderPuzzle.bubbleSortSolve();
 }
 
 document.addEventListener('keydown', e => {
