@@ -2,7 +2,8 @@ console.log("Thank you, Googlers!");
 const GameStatus = Object.freeze({
     IN_PROGESS: 1,
     SOLVED: 2,
-    SHOW_HINT: 3 
+    SHOW_HINT: 3,
+    SHUFFLE_BOARD: 4
 });
 
 const GameState = {
@@ -14,7 +15,9 @@ const GameState = {
     gameBlocks: [],
     initGridIndices: [],
     GLOBAL_ALPHA: 0,
-    DELTA_ALPHA: 0.1
+    DELTA_ALPHA: 0.1,
+    SOLVABLE_PUZZLE: false,
+    DEBUG: false
 };
 
 class puzzleBlock {
@@ -34,6 +37,8 @@ function initPuzzleBlocks(grid, sprite, rows, cols) {
     // build puzzle pieces
     let spriteWidth = sprite.width / cols;
     let spriteHeight = sprite.height / rows;
+    GameState.gameBlocks = []; 
+    GameState.SOLVABLE_PUZZLE = false;
 
     for (let row = 0; row < rows; ++ row) {
         for (let col = 0; col < cols; ++col) {
@@ -50,27 +55,37 @@ function initPuzzleBlocks(grid, sprite, rows, cols) {
         }
     }
 
-    // array of ints [0,1,2,3... WxH] to help randomize pieces on grid
-    let pieces = Array.from(Array(grid.length).keys())
+    while(!GameState.SOLVABLE_PUZZLE) {
+        // array of ints [0,1,2,3... WxH] to help randomize pieces on grid
+        let pieces = Array.from(Array(grid.length).keys())
 
-    // randomly assign puzzle pieces on grid
-    let str = '';
-    for (let i = 0; i < grid.length; ++i) {
-        let pieceIndex = Math.floor(Math.random() * pieces.length);
-        grid[i].block = GameState.gameBlocks[pieces[pieceIndex]];
+        // randomly assign puzzle pieces on grid
+        let str = '';
+        GameState.initGridIndices = [];
 
-        GameState.initGridIndices.push(grid[i].block.index);
+        for (let i = 0; i < grid.length; ++i) {
+            let pieceIndex = Math.floor(Math.random() * pieces.length);
+            grid[i].block = GameState.gameBlocks[pieces[pieceIndex]];
 
-        str += `${grid[i].block.index}, `;
-        if ((i+1) % cols == 0) {
-            console.log(str);
-            str = '';
+            GameState.initGridIndices.push(grid[i].block.index);
+
+            if (GameState.DEBUG) {
+                str += `${grid[i].block.index}, `;
+                if ((i+1) % cols == 0) {
+                    console.log(str);
+                    str = '';
+                }
+            }
+            
+            if (pieces[pieceIndex] == grid.length - 1) {
+                GameState.BLANK_PIECE_INDEX = i;
+            }
+            pieces.splice(pieceIndex, 1);
         }
 
-        if (pieces[pieceIndex] == grid.length - 1) {
-            GameState.BLANK_PIECE_INDEX = i;
-        }
-        pieces.splice(pieceIndex, 1);
+        evenInversion = totalInversions() % 2 == 0;
+        oddNumCols = cols % 2 != 0
+        GameState.SOLVABLE_PUZZLE = evenInversion && oddNumCols;
     }
 
     return grid
@@ -140,11 +155,14 @@ let sliderPuzzle = {
                 }
                 break;
             case GameStatus.SOLVED:
-                console.log("winner!!!");
-                sliderPuzzle.showSolution();
+                if (GameState.DEBUG) console.log("winner!!!");
+                this.showSolution();
                 break;
             case GameStatus.SHOW_HINT:
                 this.context.drawImage(this.sprite, 0, 0, this.canvas.width, this.canvas.height);
+                break;
+            case GameStatus.SHUFFLE_BOARD:
+                this.shuffleBoard();
                 break;
             default:
                 break;
@@ -173,6 +191,13 @@ let sliderPuzzle = {
         }
         this.context.globalAlpha = GameState.GLOBAL_ALPHA;
         this.context.drawImage(this.sprite, 0, 0, this.canvas.width, this.canvas.height);
+    },
+    shuffleBoard() {
+        this.gameGrid = getInitGrid(this.numRows, this.numCols, this.sprite);
+        if (GameState.DEBUG) 
+            console.log(`inversions: ${totalInversions()}`);
+
+        GameState.STATUS = GameStatus.IN_PROGESS;
     }
 };
 
@@ -193,9 +218,11 @@ function startGame() {
     let numRows = 3;
     let numCols = 3;
     GameState.STATUS = GameStatus.IN_PROGESS;
+    GameState.DEBUG = true;
     sliderPuzzle.start(numRows, numCols);
 
-    console.log(`inversions: ${totalInversions()}`);
+    if (GameState.DEBUG) 
+        console.log(`inversions: ${totalInversions()}`);
 }
 
 
@@ -251,6 +278,10 @@ function showHint() {
 
 function hideHint() {
     GameState.STATUS = GameState.PRIOR_STATUS;
+}
+
+function shuffleBoard() {
+    GameState.STATUS = GameStatus.SHUFFLE_BOARD;
 }
 
 document.addEventListener('keydown', e => {
