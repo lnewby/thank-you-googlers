@@ -123,13 +123,30 @@ let sliderPuzzle = {
     sprite: new Image(),
     start: function(rows = 2, cols = 2) {
         this.context = this.canvas.getContext("2d");
-        GameState.BLOCK_WIDTH = this.canvas.width / cols;
-        GameState.BLOCK_HEIGHT = this.canvas.height / rows;
+        GameState.BLOCK_WIDTH = Math.floor(this.canvas.width / cols);
+        GameState.BLOCK_HEIGHT = Math.floor(this.canvas.height / rows);
         this.sprite.src = "Google.png";
         this.numRows = rows;
         this.numCols = cols;
         this.gameGrid = getInitGrid(rows, cols, this.sprite);
         this.interval = setInterval(updateGame, 20);
+
+        this.canvas.addEventListener('click', function(event) {
+            let xCoord = event.pageX - sliderPuzzle.canvas.offsetLeft;
+            let yCoord = event.pageY - sliderPuzzle.canvas.offsetTop;
+            console.log(xCoord, yCoord);
+
+            sliderPuzzle.gameGrid.forEach((piece, index) => {
+                if (xCoord >= piece.x && xCoord <= piece.x + GameState.BLOCK_WIDTH &&
+                    yCoord >= piece.y && yCoord <= piece.y + GameState.BLOCK_HEIGHT &&
+                    sliderPuzzle.slideablePiece(piece)) {
+                        sliderPuzzle.context.fillStyle = "red";
+                        sliderPuzzle.context.fillRect(piece.x, piece.y, GameState.BLOCK_WIDTH, GameState.BLOCK_HEIGHT);
+                        sliderPuzzle.swapPuzzleBlocks(index, GameState.BLANK_PIECE_INDEX);
+                        GameState.BLANK_PIECE_INDEX = index;
+                    }
+            })
+         }, false);
     },
     clear: function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -176,6 +193,13 @@ let sliderPuzzle = {
         let tempBlock = this.gameGrid[index1].block;
         this.gameGrid[index1].block = this.gameGrid[index2].block;
         this.gameGrid[index2].block = tempBlock;
+    },
+    slideablePiece(piece) {
+        let blankPiece = this.gameGrid[GameState.BLANK_PIECE_INDEX];
+        return ((piece.row == blankPiece.row && piece.col == blankPiece.col - 1) ||
+            (piece.row == blankPiece.row && piece.col == blankPiece.col + 1) ||
+            (piece.row == blankPiece.row - 1 && piece.col == blankPiece.col) ||
+            (piece.row == blankPiece.row + 1 && piece.col == blankPiece.col));
     },
     checkWinState() {
         let winState = true;
@@ -328,19 +352,6 @@ function totalInversions() {
     return inversions;
 }
 
-function startGame() {
-    console.log("Starting Game...");
-    let numRows = 3;
-    let numCols = 3;
-    GameState.STATUS = GameStatus.IN_PROGESS;
-    GameState.DEBUG = true;
-    sliderPuzzle.start(numRows, numCols);
-
-    if (GameState.DEBUG) 
-        console.log(`inversions: ${totalInversions()}`);
-}
-
-
 function updateGame() {
     sliderPuzzle.clear();
     sliderPuzzle.draw();
@@ -437,3 +448,15 @@ document.addEventListener('keydown', e => {
             break;
     }
 }, false);
+
+function startGame() {
+    console.log("Starting Game...");
+    let numRows = 3;
+    let numCols = 3;
+    GameState.STATUS = GameStatus.IN_PROGESS;
+    GameState.DEBUG = true;
+    sliderPuzzle.start(numRows, numCols);
+
+    if (GameState.DEBUG) 
+        console.log(`inversions: ${totalInversions()}`);
+}

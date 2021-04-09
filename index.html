@@ -13,28 +13,38 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
             width: 100%;
             height: 100%;
+        }
+        #game-canvas {
+            border:1px solid #0a80ff;
         }
     </style>
 </head>
 <body onload="startGame()">
     <div id="container">
-        <canvas id="game-canvas" width="540" height="270" style="border:1px solid #0a80ff;">
+        <div>As a thank you for supporting me and so many Google SWE candidates, take a moment... breathe... and enjoy this simple Slider Puzzle made with care just for you :)</div>
+        <div>
+            <canvas id="game-canvas" width="540" height="270">
+        </div>
+        
+        <div><p><strong>&#9758;</strong> Use keyboard <strong>&larr; &varr; &rarr;</strong> to slide puzzle pieces around!</p></div>
+
+        <img id="sprite" src="Google.png" style="height:0px; width:0px;">
+
+        <button onclick="moveup()">UP</button>
+        <button onclick="movedown()">DOWN</button>
+        <button onclick="moveleft()">LEFT</button>
+        <button onclick="moveright()">RIGHT</button>
+        <button onmousedown="showHint()" onmouseup="hideHint()">HINT</button>
+        <button onclick="bubbleSort()">BUBBLESORT</button>
+        <button onclick="selectionSort()">SELECTION SORT</button>
+        <button onclick="quickSort()">QUICKSORT</button>
+        <button onclick="mergeSort()">MERGESORT</button>
+        <button onclick="shuffleBoard()">SHUFFLE PUZZLE</button>
     </div>
 
-    <img id="sprite" src="Google.png" style="height:0px; width:0px;">
-
-    <button onclick="moveup()">UP</button>
-    <button onclick="movedown()">DOWN</button>
-    <button onclick="moveleft()">LEFT</button>
-    <button onclick="moveright()">RIGHT</button>
-    <button onmousedown="showHint()" onmouseup="hideHint()">HINT</button>
-    <button onclick="bubbleSort()">BUBBLESORT</button>
-    <button onclick="selectionSort()">SELECTION SORT</button>
-    <button onclick="quickSort()">QUICKSORT</button>
-    <button onclick="mergeSort()">MERGESORT</button>
-    <button onclick="shuffleBoard()">SHUFFLE PUZZLE</button>
     <script src="game.js"></script>
 </body>
 </html>
