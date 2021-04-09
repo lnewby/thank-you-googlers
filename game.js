@@ -175,8 +175,8 @@ let sliderPuzzle = {
                 this.selectionSortSolve();
                 break;
             case GameStatus.QUICK_SORT:
-                    this.quickSortSolve();
-                    break;
+                this.quickSortSolve();
+                break;
             default:
                 break;
         }
@@ -248,8 +248,43 @@ let sliderPuzzle = {
             setTimeout(function(){ sliderPuzzle.selectionSortSolve(currentIndex + 1); }, 300);
         }
     },
-    quickSortSolve() {
-
+    quickSortSolve(startIndex = 0, endIndex = this.gameGrid.length-1) {
+        if (startIndex < endIndex) {
+            let pivot = sliderPuzzle._partition(startIndex, endIndex);
+            setTimeout(function(){ sliderPuzzle.quickSortSolve(startIndex, pivot - 1); }, 300);
+            setTimeout(function(){ sliderPuzzle.quickSortSolve(pivot + 1, endIndex); }, 300);
+        }
+    },
+    _partition(lessPtr, pivotPtr) {
+        let greaterPtr = lessPtr;
+        let unpartitionedPtr = lessPtr;
+        let pivotPos;
+        
+        while (pivotPtr > unpartitionedPtr) {
+            if (this.gameGrid[unpartitionedPtr].block.index < this.gameGrid[pivotPtr].block.index) {
+                sliderPuzzle.swapPuzzleBlocks(unpartitionedPtr, greaterPtr);
+                if (GameState.BLANK_PIECE_INDEX == unpartitionedPtr || GameState.BLANK_PIECE_INDEX == greaterPtr) {
+                    GameState.BLANK_PIECE_INDEX = (GameState.BLANK_PIECE_INDEX == unpartitionedPtr)
+                    ? greaterPtr
+                    : unpartitionedPtr;
+                }
+                ++greaterPtr;
+            }
+            ++unpartitionedPtr;
+        }
+        
+        if (this.gameGrid[unpartitionedPtr].block.index == this.gameGrid[pivotPtr].block.index) {
+            sliderPuzzle.swapPuzzleBlocks(pivotPtr, greaterPtr);
+            if (GameState.BLANK_PIECE_INDEX == pivotPtr || GameState.BLANK_PIECE_INDEX == greaterPtr) {
+                GameState.BLANK_PIECE_INDEX = (GameState.BLANK_PIECE_INDEX == pivotPtr)
+                ? greaterPtr 
+                : pivotPtr;
+            }
+        }
+        
+        pivotPos = greaterPtr;
+        
+        return pivotPos;
     }
 };
 
