@@ -16,7 +16,7 @@ const GameState = {
     gameBlocks: [],
     initGridIndices: [],
     GLOBAL_ALPHA: 0,
-    DELTA_ALPHA: 0.1,
+    DELTA_ALPHA: 0.05,
     SOLVABLE_PUZZLE: false,
     DEBUG: false
 };
@@ -208,6 +208,11 @@ let sliderPuzzle = {
             
             if (this.gameGrid[firstIndex].block.index > this.gameGrid[secondIndex].block.index) {
                 sliderPuzzle.swapPuzzleBlocks(firstIndex, secondIndex);
+                if (GameState.BLANK_PIECE_INDEX == firstIndex || GameState.BLANK_PIECE_INDEX == secondIndex) {
+                    GameState.BLANK_PIECE_INDEX = (GameState.BLANK_PIECE_INDEX == firstIndex)
+                    ? secondIndex 
+                    : firstIndex;
+                }
                 ++swaps;
             }
             setTimeout(function(){ sliderPuzzle.bubbleSortSolve(secondIndex, swaps); }, 300);
