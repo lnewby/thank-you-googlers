@@ -4,7 +4,11 @@ const GameStatus = Object.freeze({
     SOLVED: 2,
     SHOW_HINT: 3,
     SHUFFLE_BOARD: 4,
-    BUBBLE_SORT: 5
+    BUBBLE_SORT: 5,
+    SELECTION_SORT: 6,
+    QUICK_SORT: 7,
+    MERGE_SORT: 8,
+    INSERTION_SORT: 9
 });
 
 const GameState = {
@@ -167,6 +171,12 @@ let sliderPuzzle = {
             case GameStatus.BUBBLE_SORT:
                 this.bubbleSortSolve();
                 break;
+            case GameStatus.SELECTION_SORT:
+                this.selectionSortSolve();
+                break;
+            case GameStatus.QUICK_SORT:
+                    this.quickSortSolve();
+                    break;
             default:
                 break;
         }
@@ -219,6 +229,27 @@ let sliderPuzzle = {
         } else if (swaps) {
             setTimeout(function(){ sliderPuzzle.bubbleSortSolve(); }, 300);
         }
+    },
+    selectionSortSolve(currentIndex = 0) {
+        if (currentIndex < this.gameGrid.length - 1) {
+            minIndex = currentIndex;
+            
+            for (let i = currentIndex + 1; i < this.gameGrid.length; ++i)
+                minIndex = (this.gameGrid[minIndex].block.index < this.gameGrid[i].block.index) ? minIndex : i;
+            
+            if (currentIndex != minIndex)
+                sliderPuzzle.swapPuzzleBlocks(minIndex, currentIndex);
+                if (GameState.BLANK_PIECE_INDEX == minIndex || GameState.BLANK_PIECE_INDEX == currentIndex) {
+                    GameState.BLANK_PIECE_INDEX = (GameState.BLANK_PIECE_INDEX == minIndex)
+                    ? currentIndex 
+                    : minIndex;
+            }
+
+            setTimeout(function(){ sliderPuzzle.selectionSortSolve(currentIndex + 1); }, 300);
+        }
+    },
+    quickSortSolve() {
+
     }
 };
 
@@ -306,8 +337,15 @@ function shuffleBoard() {
 }
 
 function bubbleSort() {
-    // GameState.STATUS = GameStatus.BUBBLE_SORT;
     sliderPuzzle.bubbleSortSolve();
+}
+
+function selectionSort() {
+    sliderPuzzle.selectionSortSolve();
+}
+
+function quickSort() {
+    sliderPuzzle.quickSortSolve();
 }
 
 document.addEventListener('keydown', e => {
