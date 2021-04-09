@@ -168,15 +168,6 @@ let sliderPuzzle = {
             case GameStatus.SHUFFLE_BOARD:
                 this.shuffleBoard();
                 break;
-            case GameStatus.BUBBLE_SORT:
-                this.bubbleSortSolve();
-                break;
-            case GameStatus.SELECTION_SORT:
-                this.selectionSortSolve();
-                break;
-            case GameStatus.QUICK_SORT:
-                this.quickSortSolve();
-                break;
             default:
                 break;
         }
@@ -285,6 +276,43 @@ let sliderPuzzle = {
         pivotPos = greaterPtr;
         
         return pivotPos;
+    },
+    mergeSortSolve(startIndex = 0, endIndex = this.gameGrid.length - 1) {
+        sliderPuzzle._mergesort(startIndex, endIndex);
+    },
+    _mergesort(startIndex, endIndex) {
+        if (startIndex < endIndex) {
+            // divide & conquer
+            let mid = (startIndex + endIndex) >> 1;
+            sliderPuzzle._mergesort(startIndex, mid);
+            sliderPuzzle._mergesort(mid + 1, endIndex);
+            sliderPuzzle._merge(startIndex, mid, endIndex);
+        }
+    },
+    _merge(startIndex, mid, endIndex) {
+        let tempBlock = [];
+        let l_index = startIndex;
+        let r_index = mid + 1;
+        
+        while (l_index <= mid && r_index <= endIndex)
+        {
+            if (this.gameGrid[l_index].block.index <= this.gameGrid[r_index].block.index) {
+                tempBlock.push(this.gameGrid[l_index++].block);
+            } else {
+                tempBlock.push(this.gameGrid[r_index++].block);
+            }
+        }
+        
+        while (l_index <= mid) {
+            tempBlock.push(this.gameGrid[l_index++].block);
+        }
+        
+        while (r_index <= endIndex) {
+            tempBlock.push(this.gameGrid[r_index++].block);
+        }
+        
+        // add merged elements back to the gameGrid
+        tempBlock.forEach(block => { this.gameGrid[startIndex++].block = block; });
     }
 };
 
@@ -381,6 +409,10 @@ function selectionSort() {
 
 function quickSort() {
     sliderPuzzle.quickSortSolve();
+}
+
+function mergeSort() {
+    sliderPuzzle.mergeSortSolve();
 }
 
 document.addEventListener('keydown', e => {
