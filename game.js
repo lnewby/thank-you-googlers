@@ -29,10 +29,6 @@ const GameState = {
     DIFFICULTY: GameStatus.MEDIUM
 };
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 class puzzleBlock {
     constructor(index, spriteX = 0, spriteY = 0, row = 0, col = 0) {
         this.spriteX = spriteX;
@@ -626,3 +622,5 @@ function startGame(difficulty = GameStatus.MEDIUM) {
     if (GameState.DEBUG) 
         console.log(`inversions: ${totalInversions()}`);
 }
+
+// Game Entry Point End
