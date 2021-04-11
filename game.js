@@ -8,7 +8,10 @@ const GameStatus = Object.freeze({
     SELECTION_SORT: 6,
     QUICK_SORT: 7,
     MERGE_SORT: 8,
-    INSERTION_SORT: 9
+    INSERTION_SORT: 9,
+    EASY: 10,
+    MEDIUM: 11,
+    HARD: 12
 });
 
 const GameState = {
@@ -22,8 +25,13 @@ const GameState = {
     GLOBAL_ALPHA: 0,
     DELTA_ALPHA: 0.05,
     SOLVABLE_PUZZLE: false,
-    DEBUG: false
+    DEBUG: false,
+    DIFFICULTY: GameStatus.MEDIUM
 };
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 class puzzleBlock {
     constructor(index, spriteX = 0, spriteY = 0, row = 0, col = 0) {
@@ -131,15 +139,16 @@ let sliderPuzzle = {
         this.gameGrid = getInitGrid(rows, cols, this.sprite);
         this.interval = setInterval(updateGame, 20);
 
-        this.canvas.addEventListener('click', function(event) {
+        this.canvas.addEventListener('mousedown', (event) => {
             let xCoord = event.pageX - sliderPuzzle.canvas.offsetLeft;
             let yCoord = event.pageY - sliderPuzzle.canvas.offsetTop;
-            console.log(xCoord, yCoord);
+            if (GameState.DEBUG) console.log(xCoord, yCoord);
 
             sliderPuzzle.gameGrid.forEach((piece, index) => {
                 if (xCoord >= piece.x && xCoord <= piece.x + GameState.BLOCK_WIDTH &&
                     yCoord >= piece.y && yCoord <= piece.y + GameState.BLOCK_HEIGHT &&
-                    sliderPuzzle.slideablePiece(piece)) {
+                    sliderPuzzle.slideablePiece(piece) &&
+                    GameState.STATUS == GameStatus.IN_PROGESS) {
                         sliderPuzzle.context.fillStyle = "red";
                         sliderPuzzle.context.fillRect(piece.x, piece.y, GameState.BLOCK_WIDTH, GameState.BLOCK_HEIGHT);
                         sliderPuzzle.swapPuzzleBlocks(index, GameState.BLANK_PIECE_INDEX);
@@ -227,6 +236,39 @@ let sliderPuzzle = {
 
         GameState.STATUS = GameStatus.IN_PROGESS;
     },
+    insertionSortSolve(compareIndex = 0) {
+        // O(n^2)
+        let blockToInsertIndex = compareIndex + 1;
+        if (blockToInsertIndex < sliderPuzzle.gameGrid.length) {
+            sliderPuzzle._insert(compareIndex, blockToInsertIndex); // O(nlogn)
+        }
+        setTimeout(() => {
+            this.insertionSortSolve(blockToInsertIndex);
+         }, 300);
+    },
+    _insert(compareIndex, blockToInsertIndex) {
+        let currentIndex;
+        let blockToInsert = this.gameGrid[blockToInsertIndex].block;
+        // O(nlogn)
+        for (currentIndex = compareIndex;
+             currentIndex >= 0 && this.gameGrid[currentIndex].block.index > blockToInsert.index;
+             --currentIndex)
+        {
+            nextIndex = currentIndex + 1;
+            this.gameGrid[nextIndex].block = this.gameGrid[currentIndex].block;
+
+            if (currentIndex == GameState.BLANK_PIECE_INDEX) {
+                console.log("Blank moved");
+                GameState.BLANK_PIECE_INDEX = nextIndex;
+            }
+        }
+        
+        this.gameGrid[currentIndex + 1].block = blockToInsert;
+        if (blockToInsertIndex == GameState.BLANK_PIECE_INDEX) {
+            console.log("Blank inserted");
+            GameState.BLANK_PIECE_INDEX = nextIndex;
+        }
+    },
     bubbleSortSolve(firstIndex = 0, swaps = 0) {
         if (firstIndex < this.gameGrid.length - 1) {
             let secondIndex = firstIndex + 1;
@@ -240,9 +282,9 @@ let sliderPuzzle = {
                 }
                 ++swaps;
             }
-            setTimeout(function(){ sliderPuzzle.bubbleSortSolve(secondIndex, swaps); }, 300);
+            setTimeout(function(){ sliderPuzzle.bubbleSortSolve(secondIndex, swaps); }, 150);
         } else if (swaps) {
-            setTimeout(function(){ sliderPuzzle.bubbleSortSolve(); }, 300);
+            setTimeout(function(){ sliderPuzzle.bubbleSortSolve(); }, 150);
         }
     },
     selectionSortSolve(currentIndex = 0) {
@@ -260,14 +302,14 @@ let sliderPuzzle = {
                     : minIndex;
             }
 
-            setTimeout(function(){ sliderPuzzle.selectionSortSolve(currentIndex + 1); }, 300);
+            setTimeout(function(){ sliderPuzzle.selectionSortSolve(currentIndex + 1); }, 150);
         }
     },
     quickSortSolve(startIndex = 0, endIndex = this.gameGrid.length-1) {
         if (startIndex < endIndex) {
             let pivot = sliderPuzzle._partition(startIndex, endIndex);
-            setTimeout(function(){ sliderPuzzle.quickSortSolve(startIndex, pivot - 1); }, 300);
-            setTimeout(function(){ sliderPuzzle.quickSortSolve(pivot + 1, endIndex); }, 300);
+            setTimeout(function(){ sliderPuzzle.quickSortSolve(startIndex, pivot - 1); }, 200);
+            setTimeout(function(){ sliderPuzzle.quickSortSolve(pivot + 1, endIndex); }, 200);
         }
     },
     _partition(lessPtr, pivotPtr) {
@@ -301,23 +343,20 @@ let sliderPuzzle = {
         
         return pivotPos;
     },
-    mergeSortSolve(startIndex = 0, endIndex = this.gameGrid.length - 1) {
-        sliderPuzzle._mergesort(startIndex, endIndex);
-    },
-    _mergesort(startIndex, endIndex) {
+    async mergeSortSolve(startIndex = 0, endIndex = this.gameGrid.length - 1) {
         if (startIndex < endIndex) {
             // divide & conquer
-            let mid = (startIndex + endIndex) >> 1;
-            sliderPuzzle._mergesort(startIndex, mid);
-            sliderPuzzle._mergesort(mid + 1, endIndex);
-            sliderPuzzle._merge(startIndex, mid, endIndex);
+            let mid = Math.floor((startIndex + endIndex) >> 1);
+            sliderPuzzle.mergeSortSolve(startIndex, mid);
+            sliderPuzzle.mergeSortSolve(mid + 1, endIndex);
+            sliderPuzzle._merge(startIndex, mid, endIndex);    
         }
     },
     _merge(startIndex, mid, endIndex) {
         let tempBlock = [];
         let l_index = startIndex;
         let r_index = mid + 1;
-        
+        let blankBlock = this.gameGrid[GameState.BLANK_PIECE_INDEX].block;
         while (l_index <= mid && r_index <= endIndex)
         {
             if (this.gameGrid[l_index].block.index <= this.gameGrid[r_index].block.index) {
@@ -336,7 +375,12 @@ let sliderPuzzle = {
         }
         
         // add merged elements back to the gameGrid
-        tempBlock.forEach(block => { this.gameGrid[startIndex++].block = block; });
+        tempBlock.forEach((block, index) => { 
+            if (block == blankBlock) {
+                GameState.BLANK_PIECE_INDEX = startIndex + index;
+            }
+            this.gameGrid[startIndex + index].block = block; 
+        });
     }
 };
 
@@ -398,8 +442,10 @@ function moveright() {
 }
 
 function showHint() {
-    GameState.PRIOR_STATUS = GameState.STATUS;
-    GameState.STATUS = GameStatus.SHOW_HINT;
+    if (GameState.STATUS != GameStatus.SHOW_HINT) {
+        GameState.PRIOR_STATUS = GameState.STATUS;
+        GameState.STATUS = GameStatus.SHOW_HINT;
+    }
 }
 
 function hideHint() {
@@ -408,6 +454,10 @@ function hideHint() {
 
 function shuffleBoard() {
     GameState.STATUS = GameStatus.SHUFFLE_BOARD;
+}
+
+function insertionSort() {
+    sliderPuzzle.insertionSortSolve();
 }
 
 function bubbleSort() {
@@ -428,34 +478,106 @@ function mergeSort() {
 
 document.addEventListener('keydown', e => {
     let key = e.key || String.fromCharCode(e.keyCode);
-
-    if (key in ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"])
+    key = key.toLowerCase()
+    if (key in ["arrowup", "arrowdown", "arrowleft", "arrowright"])
         e.preventDefault();
 
     switch(key) {
-        case "ArrowUp": 
+        case 'w':
+        case "arrowup": 
             e.preventDefault();
             moveup();
             break;
-        case "ArrowDown": 
+        case 's':
+        case "arrowdown": 
             movedown();
             break;
-        case "ArrowLeft": 
+        case 'a':
+        case "arrowleft": 
             moveleft();
             break;
-        case "ArrowRight": 
+        case 'd':
+        case "arrowright": 
             moveright();
+            break;
+        case 'h':
+            showHint();
             break;
     }
 }, false);
 
-function startGame() {
+document.addEventListener('keyup', e => {
+    let key = e.key || String.fromCharCode(e.keyCode);
+    key = key.toLowerCase();
+
+    switch(key) {
+        case 'h':
+            hideHint();
+            break;
+    }
+}, false);
+
+let easyBtn = document.getElementById("easy-puzzle");
+let mediumBtn = document.getElementById("medium-puzzle");
+let hardBtn = document.getElementById("hard-puzzle");
+
+easyBtn.addEventListener('click', e => {
+    if (sliderPuzzle.interval)
+        clearInterval(sliderPuzzle.interval);
+    
+    easyBtn.classList.add("easy-puzzle");
+    mediumBtn.classList.remove("medium-puzzle");
+    hardBtn.classList.remove("hard-puzzle");
+    startGame(GameStatus.EASY);
+}, false);
+
+
+mediumBtn.addEventListener('click', e => {
+    if (sliderPuzzle.interval)
+        clearInterval(sliderPuzzle.interval);
+
+    easyBtn.classList.remove("easy-puzzle");
+    mediumBtn.classList.add("medium-puzzle");
+    hardBtn.classList.remove("hard-puzzle");
+    startGame(GameStatus.MEDIUM);
+});
+
+hardBtn.addEventListener('click', e => {
+    if (sliderPuzzle.interval)
+        clearInterval(sliderPuzzle.interval);
+
+    easyBtn.classList.remove("easy-puzzle");
+    mediumBtn.classList.remove("medium-puzzle");
+    hardBtn.classList.add("hard-puzzle");
+    startGame(GameStatus.HARD);
+},);
+
+let getGridDimensions = () => {
+    let dimensions;
+
+    switch (GameState.DIFFICULTY) {
+        case GameStatus.EASY:
+            dimensions = {rows: 3, cols: 3};
+            break;
+        case GameStatus.MEDIUM:
+            dimensions = {rows: 5, cols: 5};
+            break;
+        case GameStatus.HARD:
+            dimensions = {rows: 7, cols: 7};
+            break;   
+    }
+
+    return dimensions;
+};
+
+function startGame(difficulty = GameStatus.MEDIUM) {
     console.log("Starting Game...");
-    let numRows = 3;
-    let numCols = 3;
     GameState.STATUS = GameStatus.IN_PROGESS;
-    GameState.DEBUG = true;
-    sliderPuzzle.start(numRows, numCols);
+    GameState.DIFFICULTY = difficulty;
+    GameState.DEBUG = false;
+
+    let dim = getGridDimensions();
+    sliderPuzzle.start(dim.rows, dim.cols);
 
     if (GameState.DEBUG) 
         console.log(`inversions: ${totalInversions()}`);
