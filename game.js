@@ -254,19 +254,23 @@ let sliderPuzzle = {
              currentIndex >= 0 && this.gameGrid[currentIndex].block.index > blockToInsert.index;
              --currentIndex)
         {
-            nextIndex = currentIndex + 1;
+            let nextIndex = currentIndex + 1;
             this.gameGrid[nextIndex].block = this.gameGrid[currentIndex].block;
 
             if (currentIndex == GameState.BLANK_PIECE_INDEX) {
-                console.log("Blank moved");
+                if (GameState.STATUS == GameStatus.DEBUG) {
+                    console.log("Blank moved");
+                }
                 GameState.BLANK_PIECE_INDEX = nextIndex;
             }
         }
         
         this.gameGrid[currentIndex + 1].block = blockToInsert;
         if (blockToInsertIndex == GameState.BLANK_PIECE_INDEX) {
-            console.log("Blank inserted");
-            GameState.BLANK_PIECE_INDEX = nextIndex;
+            if (GameState.STATUS == GameStatus.DEBUG) {
+                console.log("Blank inserted");
+            }
+            GameState.BLANK_PIECE_INDEX = currentIndex + 1;
         }
     },
     bubbleSortSolve(firstIndex = 0, swaps = 0) {
@@ -396,13 +400,33 @@ function totalInversions() {
     return inversions;
 }
 
+function getGridDimensions() {
+    let dimensions;
+
+    switch (GameState.DIFFICULTY) {
+        case GameStatus.EASY:
+            dimensions = {rows: 3, cols: 3};
+            break;
+        case GameStatus.MEDIUM:
+            dimensions = {rows: 5, cols: 5};
+            break;
+        case GameStatus.HARD:
+            dimensions = {rows: 7, cols: 7};
+            break;   
+    }
+
+    return dimensions;
+};
+
 function updateGame() {
     sliderPuzzle.clear();
     sliderPuzzle.draw();
     sliderPuzzle.checkWinState()
 }
 
+//
 // Event System
+//
 
 function moveup() {
     let { numRows, numCols } = sliderPuzzle;
@@ -456,25 +480,92 @@ function shuffleBoard() {
     GameState.STATUS = GameStatus.SHUFFLE_BOARD;
 }
 
-function insertionSort() {
+let easyBtn = document.getElementById("easy-puzzle");
+let mediumBtn = document.getElementById("medium-puzzle");
+let hardBtn = document.getElementById("hard-puzzle");
+let insertBtn = document.getElementById("insertion-btn");
+let bubbleBtn = document.getElementById("bubble-btn");
+let selectBtn = document.getElementById("selection-btn");
+let quickBtn = document.getElementById("quick-btn");
+let hintBtn = document.getElementById("hint-btn");
+
+easyBtn.addEventListener('click', e => {
+    if (sliderPuzzle.interval)
+        clearInterval(sliderPuzzle.interval);
+    
+    easyBtn.classList.add("easy-puzzle");
+    mediumBtn.classList.remove("medium-puzzle");
+    hardBtn.classList.remove("hard-puzzle");
+
+    startGame(GameStatus.EASY);
+}, false);
+
+
+mediumBtn.addEventListener('click', e => {
+    if (sliderPuzzle.interval)
+        clearInterval(sliderPuzzle.interval);
+
+    easyBtn.classList.remove("easy-puzzle");
+    mediumBtn.classList.add("medium-puzzle");
+    hardBtn.classList.remove("hard-puzzle");
+
+    startGame(GameStatus.MEDIUM);
+}, false);
+
+hardBtn.addEventListener('click', e => {
+    if (sliderPuzzle.interval)
+        clearInterval(sliderPuzzle.interval);
+
+    easyBtn.classList.remove("easy-puzzle");
+    mediumBtn.classList.remove("medium-puzzle");
+    hardBtn.classList.add("hard-puzzle");
+
+    startGame(GameStatus.HARD);
+}, false);
+
+insertBtn.addEventListener('click', e => {
+    insertBtn.classList.add("selected-sort-btn");
+    bubbleBtn.classList.remove("selected-sort-btn");
+    selectBtn.classList.remove("selected-sort-btn");
+    quickBtn.classList.remove("selected-sort-btn");
+
     sliderPuzzle.insertionSortSolve();
-}
+}, false);
 
-function bubbleSort() {
+bubbleBtn.addEventListener('click', e => {
+    insertBtn.classList.remove("selected-sort-btn");
+    bubbleBtn.classList.add("selected-sort-btn");
+    selectBtn.classList.remove("selected-sort-btn");
+    quickBtn.classList.remove("selected-sort-btn");
+
     sliderPuzzle.bubbleSortSolve();
-}
+}, false);
 
-function selectionSort() {
+selectBtn.addEventListener('click', e => {
+    insertBtn.classList.remove("selected-sort-btn");
+    bubbleBtn.classList.remove("selected-sort-btn");
+    selectBtn.classList.add("selected-sort-btn");
+    quickBtn.classList.remove("selected-sort-btn");
+
     sliderPuzzle.selectionSortSolve();
-}
+}, false);
 
-function quickSort() {
+quickBtn.addEventListener('click', e => {
+    insertBtn.classList.remove("selected-sort-btn");
+    bubbleBtn.classList.remove("selected-sort-btn");
+    selectBtn.classList.remove("selected-sort-btn");
+    quickBtn.classList.add("selected-sort-btn");
+
     sliderPuzzle.quickSortSolve();
-}
+}, false);
 
-function mergeSort() {
-    sliderPuzzle.mergeSortSolve();
-}
+hintBtn.addEventListener('mousedown', e => {
+    showHint();
+});
+
+hintBtn.addEventListener('mouseup', e => {
+    hideHint();
+});
 
 document.addEventListener('keydown', e => {
     let key = e.key || String.fromCharCode(e.keyCode);
@@ -517,58 +608,11 @@ document.addEventListener('keyup', e => {
     }
 }, false);
 
-let easyBtn = document.getElementById("easy-puzzle");
-let mediumBtn = document.getElementById("medium-puzzle");
-let hardBtn = document.getElementById("hard-puzzle");
+// Event System End
 
-easyBtn.addEventListener('click', e => {
-    if (sliderPuzzle.interval)
-        clearInterval(sliderPuzzle.interval);
-    
-    easyBtn.classList.add("easy-puzzle");
-    mediumBtn.classList.remove("medium-puzzle");
-    hardBtn.classList.remove("hard-puzzle");
-    startGame(GameStatus.EASY);
-}, false);
-
-
-mediumBtn.addEventListener('click', e => {
-    if (sliderPuzzle.interval)
-        clearInterval(sliderPuzzle.interval);
-
-    easyBtn.classList.remove("easy-puzzle");
-    mediumBtn.classList.add("medium-puzzle");
-    hardBtn.classList.remove("hard-puzzle");
-    startGame(GameStatus.MEDIUM);
-});
-
-hardBtn.addEventListener('click', e => {
-    if (sliderPuzzle.interval)
-        clearInterval(sliderPuzzle.interval);
-
-    easyBtn.classList.remove("easy-puzzle");
-    mediumBtn.classList.remove("medium-puzzle");
-    hardBtn.classList.add("hard-puzzle");
-    startGame(GameStatus.HARD);
-},);
-
-let getGridDimensions = () => {
-    let dimensions;
-
-    switch (GameState.DIFFICULTY) {
-        case GameStatus.EASY:
-            dimensions = {rows: 3, cols: 3};
-            break;
-        case GameStatus.MEDIUM:
-            dimensions = {rows: 5, cols: 5};
-            break;
-        case GameStatus.HARD:
-            dimensions = {rows: 7, cols: 7};
-            break;   
-    }
-
-    return dimensions;
-};
+//
+// Game Entry Point
+//
 
 function startGame(difficulty = GameStatus.MEDIUM) {
     console.log("Starting Game...");

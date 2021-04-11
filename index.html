@@ -35,7 +35,7 @@
         }
         .row {
             display: flex;
-            align-items: center;
+            align-items:flex-start;
             justify-content:space-evenly;
             flex-direction: row;
             width: 100%;
@@ -59,6 +59,12 @@
         #hard-puzzle:hover {
             background-color: #d04d3d;
         }
+        #help-container {
+            display: flex;
+            align-items: center;
+            /* justify-content:; */
+            flex-direction: row;
+        }
         .easy-puzzle {
             color: #fff;
             background-color: #58a53f;
@@ -70,6 +76,10 @@
         .hard-puzzle {
             color: #fff;
             background-color: #d04d3d;
+        }
+        .selected-sort-btn {
+            color: #fff;
+            background-color: #3786fd;
         }
         button:hover {
             color: #fff;
@@ -107,7 +117,7 @@
         </div>
         
         <div class="row">
-            <div id="game-controls"><p>Use keyboard <strong>&larr; &varr; &rarr;</strong> to slide puzzle pieces around!</p></div>
+            <div id="game-controls"><p>Use keyboard <strong>&larr; &varr; &rarr;</strong> or click piece around the blank to play!</p></div>
         </div>
         <div class="row">
             <div class="col">
@@ -116,19 +126,18 @@
                 <button id="medium-puzzle" class="medium-puzzle">MEDIUM</button>
                 <button id="hard-puzzle">HARD</button>
             </div>
-            <div class="col">
-                <button onclick="moveup()">UP</button>
-                <button onclick="movedown()">DOWN</button>
-                <button onclick="moveleft()">LEFT</button>
-                <button onclick="moveright()">RIGHT</button>
-                <!-- <button onclick="shuffleBoard()">SHUFFLE PUZZLE</button> -->
-            </div>
+
             <div class="col">
                 <h3>Need help? Select an algorithm to sort things out.</h3>
-                <button onclick="bubbleSort()">BUBBLESORT</button>
-                <button onclick="selectionSort()">SELECTION SORT</button>
-                <button onclick="quickSort()">QUICKSORT</button>
-                <button onclick="insertionSort()">INSERTION SORT</button>
+                <button id="bubble-btn">BUBBLESORT</button>
+                <button id="selection-btn">SELECTION SORT</button>
+                <button id="quick-btn">QUICKSORT</button>
+                <button id="insertion-btn">INSERTION SORT</button>
+            </div>
+
+            <div class="col">
+                <h3>Need to pick at the solution?</h3>
+                <button id="hint-btn">SEE SOLUTION</button>
             </div>
         </div>
     </div>
