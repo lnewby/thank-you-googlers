@@ -86,7 +86,14 @@ button {
     color:darkgrey;
     margin-left: 20px;
 }
-
+#lance-newby > .full-name:hover {
+    color: pink;
+}
+#footer {
+    background-color: #939393;
+    color:floralwhite;
+    margin-top: 40px;
+}
 
 /****************
  * Class styles
@@ -97,6 +104,7 @@ button {
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    padding-top: 50px;
     width: 100%;
     height: 100%;
     color: rgb(0, 64, 138);

@@ -1,4 +1,3 @@
-console.log("Thank you, Googlers!");
 const GameStatus = Object.freeze({
     IN_PROGESS: 1,
     SOLVED: 2,
@@ -20,13 +19,15 @@ const GameState = {
     BLOCK_WIDTH: 90,
     BLOCK_HEIGHT: 90,
     BLANK_PIECE_INDEX: 0,
-    gameBlocks: [],
-    initGridIndices: [],
     GLOBAL_ALPHA: 0,
     DELTA_ALPHA: 0.05,
     SOLVABLE_PUZZLE: false,
     DEBUG: false,
-    DIFFICULTY: GameStatus.MEDIUM
+    DIFFICULTY: GameStatus.MEDIUM,
+    gameBlocks: [],
+    initGridIndices: [],
+    sortTimeoutId: [],
+    sortIntervalID: []
 };
 
 class puzzleBlock {
@@ -119,7 +120,7 @@ function getInitGrid(rows, cols, sprite) {
     return tempGrid;
 }
 
-let sliderPuzzle = {
+const sliderPuzzle = {
     canvas: document.getElementById("game-canvas"),
     gameGrid: [],
     numRows: null,
@@ -215,8 +216,10 @@ let sliderPuzzle = {
             if (!winState) break;
         }
 
-        if (winState)
+        if (winState) { 
             GameState.STATUS = GameStatus.SOLVED;
+            clearTimeIntervals();
+        }
     },
     showSolution() {
         if (GameState.GLOBAL_ALPHA < 1) {
@@ -238,9 +241,11 @@ let sliderPuzzle = {
         if (blockToInsertIndex < sliderPuzzle.gameGrid.length) {
             sliderPuzzle._insert(compareIndex, blockToInsertIndex); // O(nlogn)
         }
-        setTimeout(() => {
-            this.insertionSortSolve(blockToInsertIndex);
-         }, 300);
+        GameState.sortTimeoutId.push(
+            setTimeout(() => {
+                this.insertionSortSolve(blockToInsertIndex);
+            }, 300)
+        );
     },
     _insert(compareIndex, blockToInsertIndex) {
         let currentIndex;
@@ -282,9 +287,13 @@ let sliderPuzzle = {
                 }
                 ++swaps;
             }
-            setTimeout(function(){ sliderPuzzle.bubbleSortSolve(secondIndex, swaps); }, 150);
+            GameState.sortTimeoutId.push(
+                setTimeout(function(){ sliderPuzzle.bubbleSortSolve(secondIndex, swaps); }, 150)
+            );
         } else if (swaps) {
-            setTimeout(function(){ sliderPuzzle.bubbleSortSolve(); }, 150);
+            GameState.sortTimeoutId.push(
+                setTimeout(function(){ sliderPuzzle.bubbleSortSolve(); }, 150)
+            );
         }
     },
     selectionSortSolve(currentIndex = 0) {
@@ -301,15 +310,20 @@ let sliderPuzzle = {
                     ? currentIndex 
                     : minIndex;
             }
-
-            setTimeout(function(){ sliderPuzzle.selectionSortSolve(currentIndex + 1); }, 150);
+            GameState.sortTimeoutId.push(
+                setTimeout(function(){ sliderPuzzle.selectionSortSolve(currentIndex + 1); }, 150)
+            );
         }
     },
     quickSortSolve(startIndex = 0, endIndex = this.gameGrid.length-1) {
         if (startIndex < endIndex) {
             let pivot = sliderPuzzle._partition(startIndex, endIndex);
-            setTimeout(function(){ sliderPuzzle.quickSortSolve(startIndex, pivot - 1); }, 200);
-            setTimeout(function(){ sliderPuzzle.quickSortSolve(pivot + 1, endIndex); }, 200);
+            GameState.sortTimeoutId.push(
+                setTimeout(function(){ sliderPuzzle.quickSortSolve(startIndex, pivot - 1); }, 200)
+            );
+            GameState.sortTimeoutId.push(
+                setTimeout(function(){ sliderPuzzle.quickSortSolve(pivot + 1, endIndex); }, 200)
+            );
         }
     },
     _partition(lessPtr, pivotPtr) {
@@ -347,12 +361,26 @@ let sliderPuzzle = {
         if (startIndex < endIndex) {
             // divide & conquer
             let mid = Math.floor((startIndex + endIndex) >> 1);
-            sliderPuzzle.mergeSortSolve(startIndex, mid);
-            sliderPuzzle.mergeSortSolve(mid + 1, endIndex);
-            sliderPuzzle._merge(startIndex, mid, endIndex);    
+            
+            Promise.resolve()
+                .then(() => sliderPuzzle.mergeSortSolve(startIndex, mid))
+                .then(() => sliderPuzzle.mergeSortSolve(mid + 1, endIndex))
+                .then(() => {
+                    GameState.sortIntervalID.push(
+                        setInterval(() => {
+                            if (GameState.STATUS == GameStatus.SOLVED) {
+                                clearTimeIntervals();
+                            } else {
+                                sliderPuzzle._merge(startIndex, mid, endIndex);
+                            }
+                        }, 300)
+                    );
+                });      
         }
     },
     _merge(startIndex, mid, endIndex) {
+        if (GameState.STATUS == GameStatus.SOLVED) return;
+
         let tempBlock = [];
         let l_index = startIndex;
         let r_index = mid + 1;
@@ -483,7 +511,18 @@ let insertBtn = document.getElementById("insertion-btn");
 let bubbleBtn = document.getElementById("bubble-btn");
 let selectBtn = document.getElementById("selection-btn");
 let quickBtn = document.getElementById("quick-btn");
+let mergeBtn = document.getElementById("merge-btn");
 let hintBtn = document.getElementById("hint-btn");
+
+function clearTimeIntervals() {
+    while(GameState.sortIntervalID.length) {
+        clearInterval(GameState.sortIntervalID.pop());
+    }
+
+    while (GameState.sortTimeoutId.length) {
+        clearTimeout(GameState.sortTimeoutId.pop());
+    }
+}
 
 easyBtn.addEventListener('click', e => {
     if (sliderPuzzle.interval)
@@ -524,6 +563,7 @@ insertBtn.addEventListener('click', e => {
     bubbleBtn.classList.remove("selected-sort-btn");
     selectBtn.classList.remove("selected-sort-btn");
     quickBtn.classList.remove("selected-sort-btn");
+    mergeBtn.classList.remove("selected-sort-btn");
 
     sliderPuzzle.insertionSortSolve();
 }, false);
@@ -533,6 +573,7 @@ bubbleBtn.addEventListener('click', e => {
     bubbleBtn.classList.add("selected-sort-btn");
     selectBtn.classList.remove("selected-sort-btn");
     quickBtn.classList.remove("selected-sort-btn");
+    mergeBtn.classList.remove("selected-sort-btn");
 
     sliderPuzzle.bubbleSortSolve();
 }, false);
@@ -542,6 +583,7 @@ selectBtn.addEventListener('click', e => {
     bubbleBtn.classList.remove("selected-sort-btn");
     selectBtn.classList.add("selected-sort-btn");
     quickBtn.classList.remove("selected-sort-btn");
+    mergeBtn.classList.remove("selected-sort-btn");
 
     sliderPuzzle.selectionSortSolve();
 }, false);
@@ -551,9 +593,21 @@ quickBtn.addEventListener('click', e => {
     bubbleBtn.classList.remove("selected-sort-btn");
     selectBtn.classList.remove("selected-sort-btn");
     quickBtn.classList.add("selected-sort-btn");
+    mergeBtn.classList.remove("selected-sort-btn");
 
     sliderPuzzle.quickSortSolve();
 }, false);
+
+mergeBtn.addEventListener('click', e => {
+    insertBtn.classList.remove("selected-sort-btn");
+    bubbleBtn.classList.remove("selected-sort-btn");
+    selectBtn.classList.remove("selected-sort-btn");
+    quickBtn.classList.remove("selected-sort-btn");
+    mergeBtn.classList.add("selected-sort-btn");
+
+    sliderPuzzle.mergeSortSolve();
+}, false);
+
 
 hintBtn.addEventListener('mousedown', e => {
     showHint();
@@ -612,12 +666,20 @@ document.addEventListener('keyup', e => {
 
 function startGame(difficulty = GameStatus.MEDIUM) {
     console.clear();
+    console.log(`
+    ____                   __                
+    /  / _   /           / _     _ /_ _  _| 
+   (  /)(//)/( (/()(/,  (__)()()(/((-/ _) . 
+               /               _/           
+`);
     console.log("Starting Game...");
+
     GameState.STATUS = GameStatus.IN_PROGESS;
     GameState.DIFFICULTY = difficulty;
     GameState.DEBUG = false;
 
     let dim = getGridDimensions();
+
     sliderPuzzle.start(dim.rows, dim.cols);
 
     if (GameState.DEBUG) 
