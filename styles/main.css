@@ -4,9 +4,12 @@
 body, html {
     height: 100%;
 }
+a:link {
+    text-decoration: none;
+}
 button:hover {
     color: #fff;
-    background-color: #3786fd;
+    background-color: #2976e9;
 }
 button {
     font-family: 'Fira Code', monospace;
@@ -24,7 +27,7 @@ button {
     padding: .375rem .75rem;
     font-size: 1rem;
     border-radius: .25rem;
-    /* transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out; */
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
 /***************
@@ -43,13 +46,13 @@ button {
     font-family: 'Fira Code', monospace;
 }
 #easy-puzzle:hover {
-    background-color: #58a53f;
+    background-color: #4c9633;
 }
 #medium-puzzle:hover {
-    background-color: #e8b63f;
+    background-color: #d8a42c;
 }
 #hard-puzzle:hover {
-    background-color: #d04d3d;
+    background-color: #c24332;
 }
 #help-container {
     display: flex;
@@ -62,6 +65,26 @@ button {
     position:fixed;
     top: 0;
     right: 0;
+}
+#lance-newby {
+    display: flex;
+    position:fixed;
+    align-items: center;
+    top: 15px;
+    left: 15px;
+}
+#lance-newby > img {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+}
+#lance-newby > .full-name {
+    font-family: 'Fira Code', monospace;
+    font-weight: bolder;
+    font-size: 1.1em;
+    text-decoration: none;
+    color:darkgrey;
+    margin-left: 20px;
 }
 
 
