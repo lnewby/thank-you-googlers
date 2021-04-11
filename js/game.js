@@ -611,6 +611,7 @@ document.addEventListener('keyup', e => {
 //
 
 function startGame(difficulty = GameStatus.MEDIUM) {
+    console.clear();
     console.log("Starting Game...");
     GameState.STATUS = GameStatus.IN_PROGESS;
     GameState.DIFFICULTY = difficulty;

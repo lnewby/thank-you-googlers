@@ -1,75 +1,8 @@
+/**************** 
+ * Html el styles
+ ****************/
 body, html {
     height: 100%;
-}
-.container {
-    font-family: 'Shadows Into Light', cursive;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    color: rgb(0, 64, 138);
-}
-#game-canvas {
-    border:1px solid #0a80ff;
-}
-#brief-msg {
-    /* font-size: 1.2em; */
-    width: 600px;
-    /* margin: 30px; */
-    text-align: center;
-}
-#game-controls {
-    font-family: 'Fira Code', monospace;
-}
-.row {
-    display: flex;
-    align-items:flex-start;
-    justify-content:space-evenly;
-    flex-direction: row;
-    width: 100%;
-}
-.col {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    flex-direction: column;
-    font-family: 'Shadows Into Light', cursive;  
-}
-.col > button {
-    justify-content: left;
-}
-#easy-puzzle:hover {
-    background-color: #58a53f;
-}
-#medium-puzzle:hover {
-    background-color: #e8b63f;
-}
-#hard-puzzle:hover {
-    background-color: #d04d3d;
-}
-#help-container {
-    display: flex;
-    align-items: center;
-    /* justify-content:; */
-    flex-direction: row;
-}
-.easy-puzzle {
-    color: #fff;
-    background-color: #58a53f;
-}
-.medium-puzzle {
-    color: #fff;
-    background-color: #e8b63f;
-}
-.hard-puzzle {
-    color: #fff;
-    background-color: #d04d3d;
-}
-.selected-sort-btn {
-    color: #fff;
-    background-color: #3786fd;
 }
 button:hover {
     color: #fff;
@@ -92,4 +25,89 @@ button {
     font-size: 1rem;
     border-radius: .25rem;
     /* transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out; */
+}
+
+/***************
+ * ID styles
+ ***************/
+#game-canvas {
+    border:1px solid #0a80ff;
+}
+#brief-msg {
+    /* font-size: 1.2em; */
+    width: 600px;
+    /* margin: 30px; */
+    text-align: center;
+}
+#game-controls {
+    font-family: 'Fira Code', monospace;
+}
+#easy-puzzle:hover {
+    background-color: #58a53f;
+}
+#medium-puzzle:hover {
+    background-color: #e8b63f;
+}
+#hard-puzzle:hover {
+    background-color: #d04d3d;
+}
+#help-container {
+    display: flex;
+    align-items: center;
+    /* justify-content:; */
+    flex-direction: row;
+}
+#github-fork {
+    display: block;
+    position:fixed;
+    top: 0;
+    right: 0;
+}
+
+
+/****************
+ * Class styles
+ ****************/
+.container {
+    font-family: 'Shadows Into Light', cursive;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    color: rgb(0, 64, 138);
+}
+.row {
+    display: flex;
+    align-items:flex-start;
+    justify-content:space-evenly;
+    flex-direction: row;
+    width: 100%;
+}
+.col {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+    font-family: 'Shadows Into Light', cursive;  
+}
+.col > button {
+    justify-content: left;
+}
+.easy-puzzle {
+    color: #fff;
+    background-color: #58a53f;
+}
+.medium-puzzle {
+    color: #fff;
+    background-color: #e8b63f;
+}
+.hard-puzzle {
+    color: #fff;
+    background-color: #d04d3d;
+}
+.selected-sort-btn {
+    color: #fff;
+    background-color: #3786fd;
 }
