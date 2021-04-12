@@ -703,8 +703,32 @@ document.addEventListener('keyup', e => {
 //
 // Game Entry Point
 //
+function mobileCheck() {
+    const deviceTypes = [
+        /Android/i,
+        /webOS/i,
+        /iPhone/i,
+        /iPad/i,
+        /iPod/i,
+        /BlackBerry/i,
+        /Windows Phone/i
+    ];
+
+    return deviceTypes.some((deviceType) => {
+        return navigator.userAgent.match(deviceType);
+    });
+}
+
+function messageForMobile() {
+
+    if (mobileCheck()) {
+        document.getElementById('main').style.display = 'none';
+        document.getElementById('mobile-device-msg').classList.remove('hidden');
+    }
+}
 
 function startGame(difficulty = GameStatus.MEDIUM) {
+    messageForMobile();
     console.clear();
     console.log(`
     ____                   __                

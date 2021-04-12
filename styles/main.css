@@ -101,8 +101,19 @@ button {
 #footer {
     background-color: #939393;
     color:floralwhite;
-    margin-top: 40px;
-    
+    margin-top: 40px;  
+}
+#mobile-device-msg {
+    font-family: 'Shadows Into Light', cursive;
+    font-size: 2em;
+    text-align: center;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: auto;
+    height: 100%;
 }
 
 /****************
@@ -158,6 +169,10 @@ button {
 }
 .cursor-pointer {
     cursor: pointer;
+}
+.hidden {
+    display: none;
+    visibility: hidden;
 }
 
 
