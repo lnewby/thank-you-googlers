@@ -218,8 +218,7 @@ const sliderPuzzle = {
 
         GameState.STATUS = GameStatus.IN_PROGESS;
     },
-    insertionSortSolve(compareIndex = 0) {
-        // O(n^2)
+    insertionSortSolve(compareIndex = 0) { // O(n^2)
         const blockToInsertIndex = compareIndex + 1;
         if (blockToInsertIndex < sliderPuzzle.gameGrid.length) {
             sliderPuzzle._insert(compareIndex, blockToInsertIndex); // O(nlogn)
@@ -233,7 +232,7 @@ const sliderPuzzle = {
     _insert(compareIndex, blockToInsertIndex) {
         let currentIndex;
         const blockToInsert = this.gameGrid[blockToInsertIndex].block;
-        // O(nlogn)
+
         for (currentIndex = compareIndex;
              currentIndex >= 0 && this.gameGrid[currentIndex].block.index > blockToInsert.index;
              --currentIndex)
@@ -257,7 +256,7 @@ const sliderPuzzle = {
             GameState.BLANK_PIECE_INDEX = currentIndex + 1;
         }
     },
-    bubbleSortSolve(firstIndex = 0, swaps = 0) {
+    bubbleSortSolve(firstIndex = 0, swaps = 0) { // O(n^2)
         if (firstIndex < this.gameGrid.length - 1) {
             const secondIndex = firstIndex + 1;
             
@@ -279,7 +278,7 @@ const sliderPuzzle = {
             );
         }
     },
-    selectionSortSolve(currentIndex = 0) {
+    selectionSortSolve(currentIndex = 0) { // O(n^2)
         if (currentIndex < this.gameGrid.length - 1) {
             let minIndex = currentIndex;
             
@@ -298,7 +297,7 @@ const sliderPuzzle = {
             );
         }
     },
-    quickSortSolve(startIndex = 0, endIndex = this.gameGrid.length-1) {
+    quickSortSolve(startIndex = 0, endIndex = this.gameGrid.length-1) { // O(nlogn)
         if (startIndex < endIndex) {
             const pivot = sliderPuzzle._partition(startIndex, endIndex);
             GameState.sortTimeoutId.push(
@@ -340,7 +339,7 @@ const sliderPuzzle = {
         
         return pivotPos;
     },
-    async mergeSortSolve(startIndex = 0, endIndex = this.gameGrid.length - 1) {
+    async mergeSortSolve(startIndex = 0, endIndex = this.gameGrid.length - 1) { // O(nlogn)
         if (startIndex < endIndex) {
             // divide & conquer
             const mid = Math.floor((startIndex + endIndex) >> 1);
@@ -438,7 +437,7 @@ function updateGame() {
 // Event System
 //
 
-function getMousePos(event) {
+function getMousePos(event) { // O(1)
     const clientRect = sliderPuzzle.canvas.getBoundingClientRect();
     return {
         x: event.clientX - clientRect.left,
