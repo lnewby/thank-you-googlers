@@ -89,6 +89,12 @@ button {
 #lance-newby > .full-name:hover {
     color: pink;
 }
+#lance-link {
+    color: white;
+}
+#lance-link:hover {
+    color: pink;
+}
 #footer {
     background-color: #939393;
     color:floralwhite;
