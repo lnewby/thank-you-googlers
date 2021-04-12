@@ -179,7 +179,7 @@ button {
 /* Smartphones (portrait and landscape) ----------- */
 /* Smartphones (portrait) ----------- */
 @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
-    #lance-newby, #github-fork {
+    #github-fork {
         display: none;
     }
 

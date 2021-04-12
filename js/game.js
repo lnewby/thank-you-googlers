@@ -700,9 +700,6 @@ document.addEventListener('keyup', e => {
 
 // Event System End
 
-//
-// Game Entry Point
-//
 function mobileCheck() {
     const deviceTypes = [
         /Android/i,
@@ -727,6 +724,9 @@ function messageForMobile() {
     }
 }
 
+//
+// Game Entry Point
+//
 function startGame(difficulty = GameStatus.MEDIUM) {
     messageForMobile();
     console.clear();
