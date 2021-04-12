@@ -527,6 +527,8 @@ easyBtn.addEventListener('click', e => {
     hardBtn.classList.remove("hard-puzzle");
     googlerBtn.classList.remove("googler-puzzle");
 
+    clearSortBtnHighlignt();
+    
     startGame(GameStatus.EASY);
 }, false);
 
@@ -540,6 +542,8 @@ mediumBtn.addEventListener('click', e => {
     hardBtn.classList.remove("hard-puzzle");
     googlerBtn.classList.remove("googler-puzzle");
 
+    clearSortBtnHighlignt();
+
     startGame(GameStatus.MEDIUM);
 }, false);
 
@@ -552,6 +556,8 @@ hardBtn.addEventListener('click', e => {
     hardBtn.classList.add("hard-puzzle");
     googlerBtn.classList.remove("googler-puzzle");
 
+    clearSortBtnHighlignt();
+
     startGame(GameStatus.HARD);
 }, false);
 
@@ -563,6 +569,8 @@ googlerBtn.addEventListener('click', e => {
     mediumBtn.classList.remove("medium-puzzle");
     hardBtn.classList.remove("hard-puzzle");
     googlerBtn.classList.add("googler-puzzle");
+
+    clearSortBtnHighlignt();
 
     startGame(GameStatus.GOOGLER);
 }, false);
@@ -624,6 +632,14 @@ hintBtn.addEventListener('mousedown', e => {
 hintBtn.addEventListener('mouseup', e => {
     hideHint();
 });
+
+function clearSortBtnHighlignt() {
+    insertBtn.classList.remove("selected-sort-btn");
+    bubbleBtn.classList.remove("selected-sort-btn");
+    selectBtn.classList.remove("selected-sort-btn");
+    quickBtn.classList.remove("selected-sort-btn");
+    mergeBtn.classList.remove("selected-sort-btn");
+}
 
 sliderPuzzle.canvas.addEventListener('mousemove', (event) => {
     const mouse = getMousePos(event);
