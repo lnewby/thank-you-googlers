@@ -146,8 +146,6 @@ const sliderPuzzle = {
                     yCoord >= piece.y && yCoord <= piece.y + GameState.BLOCK_HEIGHT &&
                     sliderPuzzle.slideablePiece(piece) &&
                     GameState.STATUS == GameStatus.IN_PROGESS) {
-                        sliderPuzzle.context.fillStyle = "red";
-                        sliderPuzzle.context.fillRect(piece.x, piece.y, GameState.BLOCK_WIDTH, GameState.BLOCK_HEIGHT);
                         sliderPuzzle.swapPuzzleBlocks(index, GameState.BLANK_PIECE_INDEX);
                         GameState.BLANK_PIECE_INDEX = index;
                     }

@@ -142,3 +142,6 @@ button {
     color: #fff;
     background-color: #3786fd;
 }
+.cursor-pointer {
+    cursor: pointer;
+}
