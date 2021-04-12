@@ -108,7 +108,6 @@ button {
     font-size: 2em;
     text-align: center;
     margin: auto;
-    display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
@@ -172,7 +171,6 @@ button {
 }
 .hidden {
     display: none;
-    visibility: hidden;
 }
 
 

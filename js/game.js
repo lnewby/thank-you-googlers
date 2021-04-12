@@ -718,10 +718,10 @@ function mobileCheck() {
 
 function messageForMobile() {
 
-    if (mobileCheck()) {
-        document.getElementById('main').style.display = 'none';
-        document.getElementById('mobile-device-msg').classList.remove('hidden');
-    }
+    // if (mobileCheck()) {
+    //     document.getElementById('main').style.display = 'none';
+    //     document.getElementById('mobile-device-msg').classList.remove('hidden');
+    // }
 }
 
 //
