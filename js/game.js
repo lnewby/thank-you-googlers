@@ -10,7 +10,8 @@ const GameStatus = Object.freeze({
     INSERTION_SORT: 9,
     EASY: 10,
     MEDIUM: 11,
-    HARD: 12
+    HARD: 12,
+    GOOGLER: 13
 });
 
 const GameState = {
@@ -270,11 +271,11 @@ const sliderPuzzle = {
                 ++swaps;
             }
             GameState.sortTimeoutId.push(
-                setTimeout(function(){ sliderPuzzle.bubbleSortSolve(secondIndex, swaps); }, 150)
+                setTimeout(function(){ sliderPuzzle.bubbleSortSolve(secondIndex, swaps); }, 50)
             );
         } else if (swaps) {
             GameState.sortTimeoutId.push(
-                setTimeout(function(){ sliderPuzzle.bubbleSortSolve(); }, 150)
+                setTimeout(function(){ sliderPuzzle.bubbleSortSolve(); }, 50)
             );
         }
     },
@@ -301,10 +302,10 @@ const sliderPuzzle = {
         if (startIndex < endIndex) {
             let pivot = sliderPuzzle._partition(startIndex, endIndex);
             GameState.sortTimeoutId.push(
-                setTimeout(function(){ sliderPuzzle.quickSortSolve(startIndex, pivot - 1); }, 200)
+                setTimeout(function(){ sliderPuzzle.quickSortSolve(startIndex, pivot - 1); }, 250)
             );
             GameState.sortTimeoutId.push(
-                setTimeout(function(){ sliderPuzzle.quickSortSolve(pivot + 1, endIndex); }, 200)
+                setTimeout(function(){ sliderPuzzle.quickSortSolve(pivot + 1, endIndex); }, 250)
             );
         }
     },
@@ -355,7 +356,7 @@ const sliderPuzzle = {
                             } else {
                                 sliderPuzzle._merge(startIndex, mid, endIndex);
                             }
-                        }, 300)
+                        }, 250)
                     );
                 });      
         }
@@ -418,7 +419,10 @@ function getGridDimensions() {
             break;
         case GameStatus.HARD:
             dimensions = {rows: 7, cols: 7};
-            break;   
+            break;
+        case GameStatus.GOOGLER:
+            dimensions = {rows: 9, cols: 9};
+            break;
     }
 
     return dimensions;
@@ -497,6 +501,7 @@ function shuffleBoard() {
 let easyBtn = document.getElementById("easy-puzzle");
 let mediumBtn = document.getElementById("medium-puzzle");
 let hardBtn = document.getElementById("hard-puzzle");
+let googlerBtn = document.getElementById("googler-puzzle");
 let insertBtn = document.getElementById("insertion-btn");
 let bubbleBtn = document.getElementById("bubble-btn");
 let selectBtn = document.getElementById("selection-btn");
@@ -521,6 +526,7 @@ easyBtn.addEventListener('click', e => {
     easyBtn.classList.add("easy-puzzle");
     mediumBtn.classList.remove("medium-puzzle");
     hardBtn.classList.remove("hard-puzzle");
+    googlerBtn.classList.remove("googler-puzzle");
 
     startGame(GameStatus.EASY);
 }, false);
@@ -533,6 +539,7 @@ mediumBtn.addEventListener('click', e => {
     easyBtn.classList.remove("easy-puzzle");
     mediumBtn.classList.add("medium-puzzle");
     hardBtn.classList.remove("hard-puzzle");
+    googlerBtn.classList.remove("googler-puzzle");
 
     startGame(GameStatus.MEDIUM);
 }, false);
@@ -544,8 +551,21 @@ hardBtn.addEventListener('click', e => {
     easyBtn.classList.remove("easy-puzzle");
     mediumBtn.classList.remove("medium-puzzle");
     hardBtn.classList.add("hard-puzzle");
+    googlerBtn.classList.remove("googler-puzzle");
 
     startGame(GameStatus.HARD);
+}, false);
+
+googlerBtn.addEventListener('click', e => {
+    if (sliderPuzzle.interval)
+        clearInterval(sliderPuzzle.interval);
+
+    easyBtn.classList.remove("easy-puzzle");
+    mediumBtn.classList.remove("medium-puzzle");
+    hardBtn.classList.remove("hard-puzzle");
+    googlerBtn.classList.add("googler-puzzle");
+
+    startGame(GameStatus.GOOGLER);
 }, false);
 
 insertBtn.addEventListener('click', e => {

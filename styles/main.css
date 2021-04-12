@@ -54,6 +54,9 @@ button {
 #hard-puzzle:hover {
     background-color: #c24332;
 }
+#googler-puzzle:hover {
+    background-image: linear-gradient(140deg,#d04d3d,#2973fc,#58a53f,#e8b63f);
+}
 #help-container {
     display: flex;
     align-items: center;
@@ -144,6 +147,10 @@ button {
 .hard-puzzle {
     color: #fff;
     background-color: #d04d3d;
+}
+.googler-puzzle {
+    color: #fff;
+    background-image: linear-gradient(140deg,#cf766b,#6fa0fa,#79a06c,#e9c777);
 }
 .selected-sort-btn {
     color: #fff;
