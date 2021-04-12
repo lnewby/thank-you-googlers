@@ -134,23 +134,7 @@ const sliderPuzzle = {
         this.numRows = rows;
         this.numCols = cols;
         this.gameGrid = getInitGrid(rows, cols, this.sprite);
-        this.interval = setInterval(updateGame, 20);
-
-        this.canvas.addEventListener('mousedown', (event) => {
-            let xCoord = event.pageX - sliderPuzzle.canvas.offsetLeft;
-            let yCoord = event.pageY - sliderPuzzle.canvas.offsetTop;
-            if (GameState.DEBUG) console.log(xCoord, yCoord);
-
-            sliderPuzzle.gameGrid.forEach((piece, index) => {
-                if (xCoord >= piece.x && xCoord <= piece.x + GameState.BLOCK_WIDTH &&
-                    yCoord >= piece.y && yCoord <= piece.y + GameState.BLOCK_HEIGHT &&
-                    sliderPuzzle.slideablePiece(piece) &&
-                    GameState.STATUS == GameStatus.IN_PROGESS) {
-                        sliderPuzzle.swapPuzzleBlocks(index, GameState.BLANK_PIECE_INDEX);
-                        GameState.BLANK_PIECE_INDEX = index;
-                    }
-            })
-         }, false);
+        this.interval = setInterval(updateGame, 20);  
     },
     clear: function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -450,6 +434,14 @@ function updateGame() {
 // Event System
 //
 
+function getMousePos(event) {
+    let clientRect = sliderPuzzle.canvas.getBoundingClientRect();
+    return {
+        x: event.clientX - clientRect.left,
+        y: event.clientY - clientRect.top
+    };
+}
+
 function moveup() {
     let { numRows, numCols } = sliderPuzzle;
     let pieceAboveIndex = GameState.BLANK_PIECE_INDEX + numCols;
@@ -606,7 +598,6 @@ mergeBtn.addEventListener('click', e => {
     sliderPuzzle.mergeSortSolve();
 }, false);
 
-
 hintBtn.addEventListener('mousedown', e => {
     showHint();
 });
@@ -614,6 +605,38 @@ hintBtn.addEventListener('mousedown', e => {
 hintBtn.addEventListener('mouseup', e => {
     hideHint();
 });
+
+sliderPuzzle.canvas.addEventListener('mousemove', (event) => {
+    let mouse = getMousePos(event);
+
+    sliderPuzzle.gameGrid.forEach((piece, index) => {
+        if (mouse.x >= piece.x && mouse.x <= piece.x + GameState.BLOCK_WIDTH &&
+            mouse.y >= piece.y && mouse.y <= piece.y + GameState.BLOCK_HEIGHT &&
+            GameState.STATUS == GameStatus.IN_PROGESS) {
+
+            if (sliderPuzzle.slideablePiece(piece)) {
+                sliderPuzzle.canvas.classList.add('cursor-pointer');
+            } else {
+                sliderPuzzle.canvas.classList.remove('cursor-pointer');
+            } 
+        }
+    })
+}, false);
+
+sliderPuzzle.canvas.addEventListener('mousedown', (event) => {
+    let xCoord = event.pageX - sliderPuzzle.canvas.offsetLeft;
+    let yCoord = event.pageY - sliderPuzzle.canvas.offsetTop;
+
+    sliderPuzzle.gameGrid.forEach((piece, index) => {
+        if (xCoord >= piece.x && xCoord <= piece.x + GameState.BLOCK_WIDTH &&
+            yCoord >= piece.y && yCoord <= piece.y + GameState.BLOCK_HEIGHT &&
+            sliderPuzzle.slideablePiece(piece) &&
+            GameState.STATUS == GameStatus.IN_PROGESS) {
+                sliderPuzzle.swapPuzzleBlocks(index, GameState.BLANK_PIECE_INDEX);
+                GameState.BLANK_PIECE_INDEX = index;
+            }
+    })
+ }, false);
 
 document.addEventListener('keydown', e => {
     let key = e.key || String.fromCharCode(e.keyCode);
