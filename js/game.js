@@ -8,10 +8,11 @@ const GameStatus = Object.freeze({
     QUICK_SORT: 7,
     MERGE_SORT: 8,
     INSERTION_SORT: 9,
-    EASY: 10,
-    MEDIUM: 11,
-    HARD: 12,
-    GOOGLER: 13
+    HEAP_SORT: 10,
+    EASY: 11,
+    MEDIUM: 12,
+    HARD: 13,
+    GOOGLER: 14
 });
 
 const GameState = {
@@ -33,11 +34,11 @@ const GameState = {
 
 class puzzleBlock {
     constructor(index, spriteX = 0, spriteY = 0, row = 0, col = 0) {
+        this.index = index;
         this.spriteX = spriteX;
         this.spriteY = spriteY;
         this.row = row;
         this.col = col;
-        this.index = index;
         this.deltaX = 0;
         this.deltaY = 0;
     }
@@ -391,6 +392,74 @@ const sliderPuzzle = {
             }
             this.gameGrid[startIndex + index].block = block; 
         });
+    },
+    heapSortSolve() { // T: O(nlogn), S: O(1)
+        // build heap
+        sliderPuzzle._buildMinHeap();
+
+        // sort array
+        for (let endIndex = this.gameGrid.length - 1; endIndex > 0; --endIndex) {
+            // replace root with last node & heapify down
+            sliderPuzzle.swapPuzzleBlocks(0, endIndex);
+            sliderPuzzle._heapifyDown(0, endIndex);
+        }
+
+        // reverse the sorted gameGrid in-place
+        this.gameGrid.reverse();
+    },
+    _buildMinHeap() {
+        for (let i = 0; i < this.gameGrid.length; ++i) {
+            sliderPuzzle._heapifyUp(i);
+        }
+    },
+    _leftChild(key) { // O(1)
+        const l = Math.floor((key << 1) + 1);
+        return (l < this.gameGrid.length) ? l : -Infinity;
+    },
+    _rightChild(key) { // O(1)
+        const r = Math.floor((key << 1) + 2);
+        return (r < this.gameGrid.length) ? r : -Infinity;
+    },  
+    _parent(key) { // O(1)
+        if (key == 0) return -Infinity;
+        
+        const p = Math.floor((key - 1) >> 1);
+        return (p >= 0) ? p : -Infinity;
+    },
+    _heapifyUp(key) { // O(log n)
+        const p = sliderPuzzle._parent(key);
+        
+        if (p != -Infinity && this.gameGrid[p].block.index > this.gameGrid[key].block.index) {
+            sliderPuzzle.swapPuzzleBlocks(p, key);
+            sliderPuzzle._heapifyUp(p);
+        }
+    }, 
+    _heapifyDown(key, endIndex) { // O(log n)
+        if (key != -Infinity & key < endIndex) {
+            const gg = this.gameGrid;
+            const l = sliderPuzzle._leftChild(key);
+            const r = sliderPuzzle._rightChild(key);
+
+            if (l != -Infinity && r != -Infinity) {
+                if (r < endIndex && gg[l].block.index < gg[r].block.index && gg[l].block.index < gg[key].block.index) {
+                    sliderPuzzle.swapPuzzleBlocks(l, key);
+                    sliderPuzzle._heapifyDown(l, endIndex);
+                } else if (r < endIndex && gg[r].block.index < gg[key].block.index) {
+                    sliderPuzzle.swapPuzzleBlocks(r, key);
+                    sliderPuzzle._heapifyDown(r, endIndex);
+                }
+            } else if (l < endIndex && l != -Infinity && r == -Infinity) {
+                if (gg[l].block.index < gg[key].block.index) {
+                    sliderPuzzle.swapPuzzleBlocks(l, key);
+                    sliderPuzzle._heapifyDown(l, endIndex);
+                }
+            } else if (r < endIndex && r != -Infinity && l == -Infinity) {
+                if (gg[r].block.index < gg[key].block.index) {
+                    sliderPuzzle.swapPuzzleBlocks(r, key);
+                    sliderPuzzle._heapifyDown(r, endIndex);
+                }
+            }
+        }
     }
 };
 
@@ -506,6 +575,7 @@ let bubbleBtn = document.getElementById("bubble-btn");
 let selectBtn = document.getElementById("selection-btn");
 let quickBtn = document.getElementById("quick-btn");
 let mergeBtn = document.getElementById("merge-btn");
+let heapBtn = document.getElementById("heap-btn");
 let hintBtn = document.getElementById("hint-btn");
 
 function clearTimeIntervals() {
@@ -528,7 +598,7 @@ easyBtn.addEventListener('click', e => {
     googlerBtn.classList.remove("googler-puzzle");
 
     clearSortBtnHighlignt();
-    
+
     startGame(GameStatus.EASY);
 }, false);
 
@@ -581,6 +651,7 @@ insertBtn.addEventListener('click', e => {
     selectBtn.classList.remove("selected-sort-btn");
     quickBtn.classList.remove("selected-sort-btn");
     mergeBtn.classList.remove("selected-sort-btn");
+    heapBtn.classList.remove("selected-sort-btn");
 
     sliderPuzzle.insertionSortSolve();
 }, false);
@@ -591,6 +662,7 @@ bubbleBtn.addEventListener('click', e => {
     selectBtn.classList.remove("selected-sort-btn");
     quickBtn.classList.remove("selected-sort-btn");
     mergeBtn.classList.remove("selected-sort-btn");
+    heapBtn.classList.remove("selected-sort-btn");
 
     sliderPuzzle.bubbleSortSolve();
 }, false);
@@ -601,6 +673,7 @@ selectBtn.addEventListener('click', e => {
     selectBtn.classList.add("selected-sort-btn");
     quickBtn.classList.remove("selected-sort-btn");
     mergeBtn.classList.remove("selected-sort-btn");
+    heapBtn.classList.remove("selected-sort-btn");
 
     sliderPuzzle.selectionSortSolve();
 }, false);
@@ -611,6 +684,7 @@ quickBtn.addEventListener('click', e => {
     selectBtn.classList.remove("selected-sort-btn");
     quickBtn.classList.add("selected-sort-btn");
     mergeBtn.classList.remove("selected-sort-btn");
+    heapBtn.classList.remove("selected-sort-btn");
 
     sliderPuzzle.quickSortSolve();
 }, false);
@@ -621,8 +695,20 @@ mergeBtn.addEventListener('click', e => {
     selectBtn.classList.remove("selected-sort-btn");
     quickBtn.classList.remove("selected-sort-btn");
     mergeBtn.classList.add("selected-sort-btn");
+    heapBtn.classList.remove("selected-sort-btn");
 
     sliderPuzzle.mergeSortSolve();
+}, false);
+
+heapBtn.addEventListener('click', e => {
+    insertBtn.classList.remove("selected-sort-btn");
+    bubbleBtn.classList.remove("selected-sort-btn");
+    selectBtn.classList.remove("selected-sort-btn");
+    quickBtn.classList.remove("selected-sort-btn");
+    mergeBtn.classList.remove("selected-sort-btn");
+    heapBtn.classList.add("selected-sort-btn");
+
+    sliderPuzzle.heapSortSolve();
 }, false);
 
 hintBtn.addEventListener('mousedown', e => {
@@ -639,6 +725,7 @@ function clearSortBtnHighlignt() {
     selectBtn.classList.remove("selected-sort-btn");
     quickBtn.classList.remove("selected-sort-btn");
     mergeBtn.classList.remove("selected-sort-btn");
+    heapBtn.classList.remove("selected-sort-btn");
 }
 
 sliderPuzzle.canvas.addEventListener('mousemove', (event) => {
