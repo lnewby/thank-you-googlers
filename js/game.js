@@ -219,6 +219,13 @@ const sliderPuzzle = {
 
         GameState.STATUS = GameStatus.IN_PROGESS;
     },
+    _setBlankPieceIdx(index1, index2) {
+        if (GameState.BLANK_PIECE_INDEX == index1 || GameState.BLANK_PIECE_INDEX == index2) {
+            GameState.BLANK_PIECE_INDEX = (GameState.BLANK_PIECE_INDEX == index1)
+            ? index2 
+            : index1;
+        }
+    },
     insertionSortSolve(compareIndex = 0) { // O(n^2)
         const blockToInsertIndex = compareIndex + 1;
         if (blockToInsertIndex < sliderPuzzle.gameGrid.length) {
@@ -263,11 +270,7 @@ const sliderPuzzle = {
             
             if (this.gameGrid[firstIndex].block.index > this.gameGrid[secondIndex].block.index) {
                 sliderPuzzle.swapPuzzleBlocks(firstIndex, secondIndex);
-                if (GameState.BLANK_PIECE_INDEX == firstIndex || GameState.BLANK_PIECE_INDEX == secondIndex) {
-                    GameState.BLANK_PIECE_INDEX = (GameState.BLANK_PIECE_INDEX == firstIndex)
-                    ? secondIndex 
-                    : firstIndex;
-                }
+                sliderPuzzle._setBlankPieceIdx(firstIndex, secondIndex);
                 ++swaps;
             }
             GameState.sortTimeoutId.push(
@@ -286,12 +289,9 @@ const sliderPuzzle = {
             for (let i = currentIndex + 1; i < this.gameGrid.length; ++i)
                 minIndex = (this.gameGrid[minIndex].block.index < this.gameGrid[i].block.index) ? minIndex : i;
             
-            if (currentIndex != minIndex)
+            if (currentIndex != minIndex) {
                 sliderPuzzle.swapPuzzleBlocks(minIndex, currentIndex);
-                if (GameState.BLANK_PIECE_INDEX == minIndex || GameState.BLANK_PIECE_INDEX == currentIndex) {
-                    GameState.BLANK_PIECE_INDEX = (GameState.BLANK_PIECE_INDEX == minIndex)
-                    ? currentIndex 
-                    : minIndex;
+                sliderPuzzle._setBlankPieceIdx(minIndex, currentIndex);
             }
             GameState.sortTimeoutId.push(
                 setTimeout(function(){ sliderPuzzle.selectionSortSolve(currentIndex + 1); }, 150)
@@ -317,11 +317,7 @@ const sliderPuzzle = {
         while (pivotPtr > unpartitionedPtr) {
             if (this.gameGrid[unpartitionedPtr].block.index < this.gameGrid[pivotPtr].block.index) {
                 sliderPuzzle.swapPuzzleBlocks(unpartitionedPtr, greaterPtr);
-                if (GameState.BLANK_PIECE_INDEX == unpartitionedPtr || GameState.BLANK_PIECE_INDEX == greaterPtr) {
-                    GameState.BLANK_PIECE_INDEX = (GameState.BLANK_PIECE_INDEX == unpartitionedPtr)
-                    ? greaterPtr
-                    : unpartitionedPtr;
-                }
+                sliderPuzzle._setBlankPieceIdx(unpartitionedPtr, greaterPtr);
                 ++greaterPtr;
             }
             ++unpartitionedPtr;
@@ -329,11 +325,7 @@ const sliderPuzzle = {
         
         if (this.gameGrid[unpartitionedPtr].block.index == this.gameGrid[pivotPtr].block.index) {
             sliderPuzzle.swapPuzzleBlocks(pivotPtr, greaterPtr);
-            if (GameState.BLANK_PIECE_INDEX == pivotPtr || GameState.BLANK_PIECE_INDEX == greaterPtr) {
-                GameState.BLANK_PIECE_INDEX = (GameState.BLANK_PIECE_INDEX == pivotPtr)
-                ? greaterPtr 
-                : pivotPtr;
-            }
+            sliderPuzzle._setBlankPieceIdx(pivotPtr, greaterPtr);
         }
         
         pivotPos = greaterPtr;
@@ -393,23 +385,29 @@ const sliderPuzzle = {
             this.gameGrid[startIndex + index].block = block; 
         });
     },
-    heapSortSolve() { // T: O(nlogn), S: O(1)
+    async heapSortSolve() { // T: O(nlogn), S: O(1)
         // build heap
-        sliderPuzzle._buildMinHeap();
-
-        // sort array
-        for (let endIndex = this.gameGrid.length - 1; endIndex > 0; --endIndex) {
-            // replace root with last node & heapify down
-            sliderPuzzle.swapPuzzleBlocks(0, endIndex);
-            sliderPuzzle._heapifyDown(0, endIndex);
-        }
-
-        // reverse the sorted gameGrid in-place
-        this.gameGrid.reverse();
+        Promise.resolve()
+            .then(() => sliderPuzzle._buildMinHeap())
+            .then(() => {
+                // sort array
+                for (let endIndex = this.gameGrid.length - 1; endIndex > 0; --endIndex) {
+                    // replace root with last node & heapify down
+                    sliderPuzzle.swapPuzzleBlocks(0, endIndex);
+                    sliderPuzzle._setBlankPieceIdx(0, endIndex);
+                    sliderPuzzle._heapifyDown(0, endIndex);
+                }
+            })
+            .then(() => {
+                // reverse the sorted gameGrid in-place
+                this.gameGrid.reverse();
+            });
     },
-    _buildMinHeap() {
-        for (let i = 0; i < this.gameGrid.length; ++i) {
+    async _buildMinHeap(i=0) {
+        // return new Promise((resolve, reject) => {
+        if (i < this.gameGrid.length) {
             sliderPuzzle._heapifyUp(i);
+            sliderPuzzle._buildMinHeap(++i);
         }
     },
     _leftChild(key) { // O(1)
@@ -431,7 +429,8 @@ const sliderPuzzle = {
         
         if (p != -Infinity && this.gameGrid[p].block.index > this.gameGrid[key].block.index) {
             sliderPuzzle.swapPuzzleBlocks(p, key);
-            sliderPuzzle._heapifyUp(p);
+            sliderPuzzle._setBlankPieceIdx(p, key);
+            sliderPuzzle._heapifyUp(p);          
         }
     }, 
     _heapifyDown(key, endIndex) { // O(log n)
@@ -439,26 +438,42 @@ const sliderPuzzle = {
             const gg = this.gameGrid;
             const l = sliderPuzzle._leftChild(key);
             const r = sliderPuzzle._rightChild(key);
+            let heapKey, heapEndIndex;
 
             if (l != -Infinity && r != -Infinity) {
                 if (r < endIndex && gg[l].block.index < gg[r].block.index && gg[l].block.index < gg[key].block.index) {
                     sliderPuzzle.swapPuzzleBlocks(l, key);
-                    sliderPuzzle._heapifyDown(l, endIndex);
+                    sliderPuzzle._setBlankPieceIdx(l, key);
+                    heapKey = l;
+                    heapEndIndex = endIndex;
                 } else if (r < endIndex && gg[r].block.index < gg[key].block.index) {
                     sliderPuzzle.swapPuzzleBlocks(r, key);
-                    sliderPuzzle._heapifyDown(r, endIndex);
+                    sliderPuzzle._setBlankPieceIdx(r, key);
+                    heapKey = r;
+                    heapEndIndex = endIndex;
+                } else if (l < endIndex && gg[l].block.index < gg[key].block.index) {
+                    sliderPuzzle.swapPuzzleBlocks(l, key);
+                    sliderPuzzle._setBlankPieceIdx(l, key);
+                    heapKey = l;
+                    heapEndIndex = endIndex;
                 }
             } else if (l < endIndex && l != -Infinity && r == -Infinity) {
                 if (gg[l].block.index < gg[key].block.index) {
                     sliderPuzzle.swapPuzzleBlocks(l, key);
-                    sliderPuzzle._heapifyDown(l, endIndex);
+                    sliderPuzzle._setBlankPieceIdx(l, key);
+                    heapKey = l;
+                    heapEndIndex = endIndex;
                 }
             } else if (r < endIndex && r != -Infinity && l == -Infinity) {
                 if (gg[r].block.index < gg[key].block.index) {
                     sliderPuzzle.swapPuzzleBlocks(r, key);
-                    sliderPuzzle._heapifyDown(r, endIndex);
+                    sliderPuzzle._setBlankPieceIdx(r, key);
+                    heapKey = r;
+                    heapEndIndex = endIndex;
                 }
             }
+
+            sliderPuzzle._heapifyDown(heapKey, heapEndIndex);
         }
     }
 };
