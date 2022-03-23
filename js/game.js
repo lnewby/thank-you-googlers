@@ -881,16 +881,6 @@ function startGame(difficulty = GameStatus.MEDIUM) {
    (  /)(//)/( (/()(/,  (__)()()(/((-/ _) . 
                /               _/           
 `);
-    console.log("Cherie Kwok - Talent Outreach Specialist");
-    console.log("Megan Subocz-quinn - Recruiter for Search");
-    console.log("Jason Hawes - Recruiting Coordinato");
-    console.log("Anthony Mays - Google Champion");
-    console.log("Wendy - 1st Interviewer");
-    console.log("Sam - 2nd Interviewer");
-    console.log("Zhuo Liang - 3rd Interviewer");
-    console.log("Yimo Chen - 4th Interviewer");
-    console.log("Dongqing Zhang - 5th Interviewer");
-    console.log("Lucy Wang - Googler Reference");
 
     GameState.STATUS = GameStatus.IN_PROGESS;
     GameState.DIFFICULTY = difficulty;
