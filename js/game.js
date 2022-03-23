@@ -388,26 +388,42 @@ const sliderPuzzle = {
     async heapSortSolve() { // T: O(nlogn), S: O(1)
         // build heap
         Promise.resolve()
-            .then(() => sliderPuzzle._buildMinHeap())
+            .then(() => sliderPuzzle._buildMaxHeap())
             .then(() => {
                 // sort array
-                for (let endIndex = this.gameGrid.length - 1; endIndex > 0; --endIndex) {
-                    // replace root with last node & heapify down
-                    sliderPuzzle.swapPuzzleBlocks(0, endIndex);
-                    sliderPuzzle._setBlankPieceIdx(0, endIndex);
-                    sliderPuzzle._heapifyDown(0, endIndex);
-                }
-            })
-            .then(() => {
-                // reverse the sorted gameGrid in-place
-                this.gameGrid.reverse();
+                sliderPuzzle._heapSort();
             });
     },
-    async _buildMinHeap(i=0) {
-        // return new Promise((resolve, reject) => {
+    _sortIntervalIdWrapper(timeout) {
+
+    },
+    async _heapSort(endIndex = this.gameGrid.length) {
+        if (endIndex > 0) {
+            // replace root with last node & heapify down
+            Promise.resolve()
+                .then(() => {
+                    GameState.sortIntervalID.push(
+                        setInterval(() => {
+                            if (GameState.STATUS == GameStatus.SOLVED) {
+                                clearTimeIntervals();
+                            } else {
+                                sliderPuzzle.swapPuzzleBlocks(0, endIndex);
+                                sliderPuzzle._setBlankPieceIdx(0, endIndex);
+                            }
+                        }, 100)
+                    );
+                })
+                .then(() => {
+                    sliderPuzzle._heapifyDown(0, endIndex);
+                })
+                .then(() => sliderPuzzle._heapSort(--endIndex));
+        }
+    },
+    async _buildMaxHeap(i=0) {
         if (i < this.gameGrid.length) {
-            sliderPuzzle._heapifyUp(i);
-            sliderPuzzle._buildMinHeap(++i);
+            Promise.resolve()
+            .then(() => sliderPuzzle._heapifyUp(i))
+            .then(() => sliderPuzzle._buildMaxHeap(++i));
         }
     },
     _leftChild(key) { // O(1)
@@ -424,13 +440,24 @@ const sliderPuzzle = {
         const p = Math.floor((key - 1) >> 1);
         return (p >= 0) ? p : -Infinity;
     },
-    _heapifyUp(key) { // O(log n)
+    async _heapifyUp(key) { // O(log n)
         const p = sliderPuzzle._parent(key);
         
-        if (p != -Infinity && this.gameGrid[p].block.index > this.gameGrid[key].block.index) {
-            sliderPuzzle.swapPuzzleBlocks(p, key);
-            sliderPuzzle._setBlankPieceIdx(p, key);
-            sliderPuzzle._heapifyUp(p);          
+        if (p != -Infinity && this.gameGrid[p].block.index < this.gameGrid[key].block.index) {
+            Promise.resolve()
+            .then(() => {
+                GameState.sortIntervalID.push(
+                    setInterval(() => {
+                        if (GameState.STATUS == GameStatus.SOLVED) {
+                            clearTimeIntervals();
+                        } else {
+                            sliderPuzzle.swapPuzzleBlocks(p, key);
+                            sliderPuzzle._setBlankPieceIdx(p, key)
+                        }
+                    }, 100)
+                )
+            })
+            .then(() => sliderPuzzle._heapifyUp(p));          
         }
     }, 
     _heapifyDown(key, endIndex) { // O(log n)
@@ -438,42 +465,41 @@ const sliderPuzzle = {
             const gg = this.gameGrid;
             const l = sliderPuzzle._leftChild(key);
             const r = sliderPuzzle._rightChild(key);
-            let heapKey, heapEndIndex;
+            let heapKey;
 
             if (l != -Infinity && r != -Infinity) {
-                if (r < endIndex && gg[l].block.index < gg[r].block.index && gg[l].block.index < gg[key].block.index) {
-                    sliderPuzzle.swapPuzzleBlocks(l, key);
-                    sliderPuzzle._setBlankPieceIdx(l, key);
+                if (r < endIndex && gg[l].block.index > gg[r].block.index && gg[l].block.index > gg[key].block.index) {
                     heapKey = l;
-                    heapEndIndex = endIndex;
-                } else if (r < endIndex && gg[r].block.index < gg[key].block.index) {
-                    sliderPuzzle.swapPuzzleBlocks(r, key);
-                    sliderPuzzle._setBlankPieceIdx(r, key);
+                } else if (r < endIndex && gg[r].block.index > gg[key].block.index) {
                     heapKey = r;
-                    heapEndIndex = endIndex;
-                } else if (l < endIndex && gg[l].block.index < gg[key].block.index) {
-                    sliderPuzzle.swapPuzzleBlocks(l, key);
-                    sliderPuzzle._setBlankPieceIdx(l, key);
+                } else if (l < endIndex && gg[l].block.index > gg[key].block.index) {
                     heapKey = l;
-                    heapEndIndex = endIndex;
                 }
             } else if (l < endIndex && l != -Infinity && r == -Infinity) {
-                if (gg[l].block.index < gg[key].block.index) {
-                    sliderPuzzle.swapPuzzleBlocks(l, key);
-                    sliderPuzzle._setBlankPieceIdx(l, key);
+                if (gg[l].block.index > gg[key].block.index) {
                     heapKey = l;
-                    heapEndIndex = endIndex;
                 }
             } else if (r < endIndex && r != -Infinity && l == -Infinity) {
-                if (gg[r].block.index < gg[key].block.index) {
-                    sliderPuzzle.swapPuzzleBlocks(r, key);
-                    sliderPuzzle._setBlankPieceIdx(r, key);
+                if (gg[r].block.index > gg[key].block.index) {
                     heapKey = r;
-                    heapEndIndex = endIndex;
                 }
             }
 
-            sliderPuzzle._heapifyDown(heapKey, heapEndIndex);
+            Promise.resolve()
+            .then(() => {
+                GameState.sortIntervalID.push(
+                    setInterval(() => {
+                        if (GameState.STATUS == GameStatus.SOLVED) {
+                            clearTimeIntervals();
+                        } else {
+                            sliderPuzzle.swapPuzzleBlocks(heapKey, key);
+                            sliderPuzzle._setBlankPieceIdx(heapKey, key);
+                        }
+                    }, 100)
+                )
+            })
+            .then(() => sliderPuzzle._heapifyDown(heapKey, endIndex));
+            
         }
     }
 };
